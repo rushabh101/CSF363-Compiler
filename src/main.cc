@@ -92,21 +92,28 @@ int main(int argc, char *argv[]) {
 	int token;
 	std::string contents;
 	
+	// Run preprocessor until no more macros can be expanded
+	// Preprocessor works on a "temp" file which is removed at the end
 	do {
 		fooin = fopen("temp", "r");
 		count = 0;
 		token = 0;
 		contents = "";
 
+		// Run lexer on program (macro replacing and comment removal)
 		do {
 			token = foolex();
 			std::string temp = footext;
+
+			// Every time a macro is added, check for cycles
 			if(token == 5 && cycle_check(map)) {
 				std::cerr<<"Cycle detected in #def statements"<<std::endl;
 				remove("temp");
 				fclose(fooin);
 				exit(1);
 			}
+
+			// Every time a word is taken in check if it matches macro
 			if(token == 3 && map.find(temp) != map.end()) {
 				count++;
 				temp = map[temp];
@@ -130,7 +137,8 @@ int main(int argc, char *argv[]) {
 
 	} while(token != 0);
 
-	std::cout<<"PRE"<<std::endl<<contents<<std::endl;
+	// Printing final preprocessed code
+	// std::cout<<"PRE"<<std::endl<<contents<<std::endl;
 	
 	fclose(fooin);
 
@@ -141,6 +149,7 @@ int main(int argc, char *argv[]) {
 	// Main Lexer and Parser
 	yyin = fopen("temp", "r");
 
+	// For debugging, prints tokens
 	if (arg_option == ARG_OPTION_L) {
 		extern std::string token_to_string(int token, const char *lexeme);
 
@@ -157,6 +166,8 @@ int main(int argc, char *argv[]) {
 	}
 
     final_values = nullptr;
+
+	// Actual lex and parse
 	yyparse();
 
 	fclose(yyin);
