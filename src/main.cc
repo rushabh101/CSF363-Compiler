@@ -63,10 +63,10 @@ bool cycle_check(std::unordered_map<std::string, std::string> m) {
 		std::string ptr = i.first;
 		while(m.find(ptr) != m.end()) {
 			ptr = m[ptr];
-			if(ptr == i.first) return false;
+			if(ptr == i.first) return true;
 		}
 	}
-	return true;
+	return false;
 }
 
 int main(int argc, char *argv[]) {
@@ -138,7 +138,7 @@ int main(int argc, char *argv[]) {
 	} while(token != 0);
 
 	// Printing final preprocessed code
-	// std::cout<<"PRE"<<std::endl<<contents<<std::endl;
+	std::cout<<"PRE"<<std::endl<<contents<<std::endl;
 	
 	fclose(fooin);
 

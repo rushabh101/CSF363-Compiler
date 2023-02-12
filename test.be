@@ -1,8 +1,9 @@
 #def abc bd
-#def bd abc
-#def l u
 let abc = 123 * 20 + 20 + (22 / 2) - 3;
 dbg abc + abc;
+
+/* sakdflj */
+// one line is all I need
 
 #undef abc
 let abc = 2;

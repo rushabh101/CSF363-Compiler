@@ -3,6 +3,7 @@
 %option prefix="foo"
 
 %x comment
+%x comment2
 %x DEFINE
 %x DEFINE2
 %x UNDEF
@@ -31,6 +32,10 @@ unordered_map<string, string> map;
 <comment>[^*]*        /* eat anything that's not a '*' */
 <comment>"*"+[^*/]*   /* eat up '*'s not followed by '/'s */
 <comment>"*"+"/"        {BEGIN(INITIAL);}
+
+"//"    BEGIN(comment2);
+<comment2>. /* om nom */
+<comment2>[ \n]+ {BEGIN(INITIAL);}
 
 [a-zA-Z]+ {return 3;}
 . {return 4;}
