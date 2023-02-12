@@ -89,19 +89,25 @@ int main(int argc, char *argv[]) {
 	otemp.close();
 
 	// Actual Pre
+	int count;
+	int token;
+	std::string contents;
+
 	fooin = fopen("temp", "r");
 	if(!fooin) {
         std::cerr << "File does not exists.\n";
         exit(1);
     }
-	int token = 0;
-	std::string contents = "";
+	count = 0;
+	token = 0;
+	contents = "";
 
 	do {
 		token = foolex();
 		std::string temp = footext;
-		if(map.find(temp) != map.end())
+		if(token == 3 && map.find(temp) != map.end()) {
 			temp = map[temp];
+		}
 		contents += temp;
 
 	} while(token != 0);
@@ -115,7 +121,7 @@ int main(int argc, char *argv[]) {
 	do {
 		token = foolex();
 		std::string temp = footext;
-		if(token != 1)
+		if(token != 1 && token != 2)
 			contents += temp;
 
 	} while(token != 0);

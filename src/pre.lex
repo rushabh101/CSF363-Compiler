@@ -5,6 +5,7 @@
 %x comment
 %x DEFINE
 %x DEFINE2
+%x UNDEF
 %{
 #include <string>
 #include <unordered_map>
@@ -21,11 +22,16 @@ unordered_map<string, string> map;
 <DEFINE2>[a-zA-Z]+ {map[key] = yytext; return 1;}
 <DEFINE2>[ \n]+ {BEGIN(INITIAL); return 1;}
 
+"#undef " {BEGIN(UNDEF); return 2;}
+<UNDEF>[a-zA-Z]+ {map.erase(yytext); return 2;}
+<UNDEF>[ \n]+ {BEGIN(INITIAL); return 2;}
+
+
 "/*"         BEGIN(comment);
 <comment>[^*]*        /* eat anything that's not a '*' */
 <comment>"*"+[^*/]*   /* eat up '*'s not followed by '/'s */
 <comment>"*"+"/"        {BEGIN(INITIAL);}
 
-[a-zA-Z]+ {return 2;}
-. {return 3;}
+[a-zA-Z]+ {return 3;}
+. {return 4;}
 %%
