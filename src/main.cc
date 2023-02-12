@@ -17,6 +17,8 @@ extern char *yytext;
 extern FILE *fooin;
 extern FILE *fooout;
 extern int foolex();
+extern char *footext;
+
 extern std::string key;
 extern std::unordered_map<std::string, std::string> map;
 
@@ -56,32 +58,84 @@ int parse_arguments(int argc, char *argv[]) {
 	return ARG_FAIL;
 }
 
+int find_replace(std::string &contents, std::string one, std::string two) {
+	auto pos = contents.find(one);
+	int count = 0;
+  	while (pos != std::string::npos) {
+		count++;
+		contents.replace(pos, one.length(), two);
+		// Continue searching from here.
+		pos = contents.find(one, pos);
+	}
+	return count;
+}
+
 int main(int argc, char *argv[]) {
 	int arg_option = parse_arguments(argc, argv);
 	if (arg_option == ARG_FAIL) {
 		exit(1);
 	}
 
+	// Open file for preprocessing
 	std::string file_name(argv[1]);
-	FILE *source = fopen(argv[1], "r");
-	FILE *preOut = fopen("temp", "w");
 
-    if(!source) {
+	std::ifstream itemp(file_name);
+	std::ofstream otemp("temp");
+	std::string line;
+	while (getline(itemp, line)) {
+		otemp << line << std::endl;
+	}
+	itemp.close();
+	otemp.close();
+
+	// Actual Pre
+	fooin = fopen("temp", "r");
+	if(!fooin) {
         std::cerr << "File does not exists.\n";
         exit(1);
     }
+	int token = 0;
+	std::string contents = "";
 
-	fooout = preOut;
-	fooin = source;
-	foolex();
+	do {
+		token = foolex();
+		std::string temp = footext;
+		if(map.find(temp) != map.end())
+			temp = map[temp];
+		contents += temp;
+
+	} while(token != 0);
+
+	otemp.open("temp");
+	otemp<<contents;
+	otemp.close();
+
+	fooin = fopen("temp", "r");
+	contents = "";
+	do {
+		token = foolex();
+		std::string temp = footext;
+		if(token != 1)
+			contents += temp;
+
+	} while(token != 0);
+
+	std::cout<<"PRE"<<std::endl<<contents<<std::endl;
+	
+	fclose(fooin);
+	// fclose(preOut);
+
+	// Checking for macro cycles
 	for(auto i:map) {
-		std::cout<<i.first<<" "<<i.second<<std::endl;
+		
 	}
-	fclose(source);
-	fclose(preOut);
 
-	source = fopen("temp", "r");
-	yyin = source;
+	std::ofstream ofile("temp");
+	ofile<<contents;
+	ofile.close();
+
+	// Main Lexer and Parser
+	yyin = fopen("temp", "r");
 
 	if (arg_option == ARG_OPTION_L) {
 		extern std::string token_to_string(int token, const char *lexeme);

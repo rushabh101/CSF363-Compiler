@@ -15,14 +15,17 @@ unordered_map<string, string> map;
 %}
 %%
 
-"#def " BEGIN(DEFINE);
-<DEFINE>[a-zA-Z]+ {key = yytext;}
-<DEFINE>" " BEGIN(DEFINE2);
-<DEFINE2>[a-zA-Z]+ { map[key] = yytext; printf("mapped: %s\n", yytext);}
-<DEFINE2>[ \n]+ BEGIN(INITIAL);
+"#def " {BEGIN(DEFINE); return 1;}
+<DEFINE>[a-zA-Z]+ {key = yytext; return 1;}
+<DEFINE>" " {BEGIN(DEFINE2); return 1;}
+<DEFINE2>[a-zA-Z]+ {map[key] = yytext; return 1;}
+<DEFINE2>[ \n]+ {BEGIN(INITIAL); return 1;}
 
 "/*"         BEGIN(comment);
 <comment>[^*]*        /* eat anything that's not a '*' */
 <comment>"*"+[^*/]*   /* eat up '*'s not followed by '/'s */
-<comment>"*"+"/"        BEGIN(INITIAL);
+<comment>"*"+"/"        {BEGIN(INITIAL);}
+
+[a-zA-Z]+ {return 2;}
+. {return 3;}
 %%
