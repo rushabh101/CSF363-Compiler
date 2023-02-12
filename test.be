@@ -1,7 +1,10 @@
 #def abc bd
 #def MAC let r = 2; \
 dbg r;
-let abc = 123 * 20 + 20 + (22 / 2) - 3;
+
+#def AA
+
+let abc = 123 * 20 + 20 + (22 / 2) - AA;
 dbg abc + abc;
 
 /* sakdflj */
