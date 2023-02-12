@@ -1,6 +1,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <unordered_map>
 #include <cstdio>
 #include <cstring>
 #include <fstream>
@@ -12,6 +13,12 @@
 extern FILE *yyin;
 extern int yylex();
 extern char *yytext;
+
+extern FILE *fooin;
+extern FILE *fooout;
+extern int foolex();
+extern std::string key;
+extern std::unordered_map<std::string, std::string> map;
 
 NodeStmts *final_values;
 
@@ -57,12 +64,23 @@ int main(int argc, char *argv[]) {
 
 	std::string file_name(argv[1]);
 	FILE *source = fopen(argv[1], "r");
+	FILE *preOut = fopen("temp", "w");
 
     if(!source) {
         std::cerr << "File does not exists.\n";
         exit(1);
     }
 
+	fooout = preOut;
+	fooin = source;
+	foolex();
+	for(auto i:map) {
+		std::cout<<i.first<<" "<<i.second<<std::endl;
+	}
+	fclose(source);
+	fclose(preOut);
+
+	source = fopen("temp", "r");
 	yyin = source;
 
 	if (arg_option == ARG_OPTION_L) {
@@ -84,6 +102,7 @@ int main(int argc, char *argv[]) {
 	yyparse();
 
 	fclose(yyin);
+	remove("temp");
 
 	if(final_values) {
 		if (arg_option == ARG_OPTION_P) {
