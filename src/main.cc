@@ -58,16 +58,15 @@ int parse_arguments(int argc, char *argv[]) {
 	return ARG_FAIL;
 }
 
-int find_replace(std::string &contents, std::string one, std::string two) {
-	auto pos = contents.find(one);
-	int count = 0;
-  	while (pos != std::string::npos) {
-		count++;
-		contents.replace(pos, one.length(), two);
-		// Continue searching from here.
-		pos = contents.find(one, pos);
+bool cycle_check(std::unordered_map<std::string, std::string> m) {
+	for(auto i: m) {
+		std::string ptr = i.first;
+		while(m.find(ptr) != m.end()) {
+			ptr = m[ptr];
+			if(ptr == i.first) return false;
+		}
 	}
-	return count;
+	return true;
 }
 
 int main(int argc, char *argv[]) {
@@ -76,7 +75,7 @@ int main(int argc, char *argv[]) {
 		exit(1);
 	}
 
-	// Open file for preprocessing
+	// Pre-Processing
 	std::string file_name(argv[1]);
 
 	std::ifstream itemp(file_name);
@@ -95,10 +94,6 @@ int main(int argc, char *argv[]) {
 	
 	do {
 		fooin = fopen("temp", "r");
-		if(!fooin) {
-			std::cerr << "File does not exists.\n";
-			exit(1);
-		}
 		count = 0;
 		token = 0;
 		contents = "";
@@ -106,6 +101,12 @@ int main(int argc, char *argv[]) {
 		do {
 			token = foolex();
 			std::string temp = footext;
+			if(token == 5 && cycle_check(map)) {
+				std::cerr<<"Cycle detected in #def statements"<<std::endl;
+				remove("temp");
+				fclose(fooin);
+				exit(1);
+			}
 			if(token == 3 && map.find(temp) != map.end()) {
 				count++;
 				temp = map[temp];
@@ -118,12 +119,13 @@ int main(int argc, char *argv[]) {
 		otemp<<contents;
 		otemp.close();
 	} while(count > 0);
+
 	fooin = fopen("temp", "r");
 	contents = "";
 	do {
 		token = foolex();
 		std::string temp = footext;
-		if(token != 1 && token != 2)
+		if(token != 1 && token != 2 && token != 5)
 			contents += temp;
 
 	} while(token != 0);
@@ -131,12 +133,6 @@ int main(int argc, char *argv[]) {
 	std::cout<<"PRE"<<std::endl<<contents<<std::endl;
 	
 	fclose(fooin);
-	// fclose(preOut);
-
-	// Checking for macro cycles
-	for(auto i:map) {
-		
-	}
 
 	std::ofstream ofile("temp");
 	ofile<<contents;

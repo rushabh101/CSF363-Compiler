@@ -3,5 +3,6 @@ obj/
 src/parser.cc
 include/parser.hh
 src/*_lex.cc
+temp
 .vscode/
 compile_flags.txt
