@@ -1,4 +1,5 @@
-#def abc b
+#def abc bd`
+#def bd ef
 #def l u
 let abc = 123 * 20 + 20 + (22 / 2) - 3;
 dbg abc + abc;

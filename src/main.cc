@@ -92,30 +92,32 @@ int main(int argc, char *argv[]) {
 	int count;
 	int token;
 	std::string contents;
-
-	fooin = fopen("temp", "r");
-	if(!fooin) {
-        std::cerr << "File does not exists.\n";
-        exit(1);
-    }
-	count = 0;
-	token = 0;
-	contents = "";
-
+	
 	do {
-		token = foolex();
-		std::string temp = footext;
-		if(token == 3 && map.find(temp) != map.end()) {
-			temp = map[temp];
+		fooin = fopen("temp", "r");
+		if(!fooin) {
+			std::cerr << "File does not exists.\n";
+			exit(1);
 		}
-		contents += temp;
+		count = 0;
+		token = 0;
+		contents = "";
 
-	} while(token != 0);
+		do {
+			token = foolex();
+			std::string temp = footext;
+			if(token == 3 && map.find(temp) != map.end()) {
+				count++;
+				temp = map[temp];
+			}
+			contents += temp;
 
-	otemp.open("temp");
-	otemp<<contents;
-	otemp.close();
+		} while(token != 0);
 
+		otemp.open("temp");
+		otemp<<contents;
+		otemp.close();
+	} while(count > 0);
 	fooin = fopen("temp", "r");
 	contents = "";
 	do {
