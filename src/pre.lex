@@ -20,8 +20,9 @@ unordered_map<string, string> map;
 "#def " {BEGIN(DEFINE); return 1;}
 <DEFINE>[a-zA-Z]+ {key = yytext; return 1;}
 <DEFINE>" " {BEGIN(DEFINE2); return 1;}
-<DEFINE2>[a-zA-Z]+ {map[key] = yytext; return 5;}
-<DEFINE2>[ \n]+ {BEGIN(INITIAL); return 1;}
+<DEFINE2>[^\\\n]+ {map[key] += yytext; return 5;}
+<DEFINE2>"\\\n" {return 1;}
+<DEFINE2>[\n]+ {BEGIN(INITIAL); return 1;}
 
 "#undef " {BEGIN(UNDEF); return 2;}
 <UNDEF>[a-zA-Z]+ {map.erase(yytext); return 2;}
