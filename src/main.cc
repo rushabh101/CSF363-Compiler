@@ -69,24 +69,7 @@ bool cycle_check(std::unordered_map<std::string, std::string> m) {
 	return false;
 }
 
-int main(int argc, char *argv[]) {
-	int arg_option = parse_arguments(argc, argv);
-	if (arg_option == ARG_FAIL) {
-		exit(1);
-	}
-
-	// Pre-Processing
-	std::string file_name(argv[1]);
-
-	std::ifstream itemp(file_name);
-	std::ofstream otemp("temp");
-	std::string line;
-	while (getline(itemp, line)) {
-		otemp << line << std::endl;
-	}
-	itemp.close();
-	otemp.close();
-
+void preprocess() {
 	// Actual Pre
 	int count;
 	int token;
@@ -122,7 +105,7 @@ int main(int argc, char *argv[]) {
 
 		} while(token != 0);
 
-		otemp.open("temp");
+		std::ofstream otemp("temp");
 		otemp<<contents;
 		otemp.close();
 	} while(count > 0);
@@ -145,6 +128,27 @@ int main(int argc, char *argv[]) {
 	std::ofstream ofile("temp");
 	ofile<<contents;
 	ofile.close();
+}
+
+int main(int argc, char *argv[]) {
+	int arg_option = parse_arguments(argc, argv);
+	if (arg_option == ARG_FAIL) {
+		exit(1);
+	}
+
+	// Copying main file to temp for preprocessing
+	std::string file_name(argv[1]);
+
+	std::ifstream itemp(file_name);
+	std::ofstream otemp("temp");
+	std::string line;
+	while (getline(itemp, line)) {
+		otemp << line << std::endl;
+	}
+	itemp.close();
+	otemp.close();
+
+	preprocess();
 
 	// Main Lexer and Parser
 	yyin = fopen("temp", "r");
