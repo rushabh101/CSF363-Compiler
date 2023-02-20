@@ -1,12 +1,17 @@
-#def abc_12 bd
+#def abc bd
 #def r q
-#def MAC let r = 2; \
+#def NUM 10
+#def MAC let r =NUM; \
 dbg r;
 
 #def AA
 
-let abc_12 = 123 * 20 + 20 + (22 / 2) - AA;
+#ifdef abc
+let abc = 123 * 20 + 20 + (22 / 2) - AA;
 dbg abc + abc;
+#else
+dbg 10;
+#endif
 
 /* sakdflj */
 // one line is all I need
