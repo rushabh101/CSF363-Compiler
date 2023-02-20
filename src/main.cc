@@ -5,6 +5,7 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
+#include <sstream>
 
 #include "parser.hh"
 #include "ast.hh"
@@ -58,13 +59,29 @@ int parse_arguments(int argc, char *argv[]) {
 	return ARG_FAIL;
 }
 
-bool cycle_check(std::unordered_map<std::string, std::string> m) {
-	for(auto i: m) {
-		std::string ptr = i.first;
-		while(m.find(ptr) != m.end()) {
-			ptr = m[ptr];
-			if(ptr == i.first) return true;
+bool rec_check(std::vector<std::pair<std::string, std::string>> l, std::string ind, std::string start) {
+	if(ind == start) return true;
+	for(auto i: l) {
+		if(i.first == ind) {
+			bool res = rec_check(l, i.second, start);
+			if(res) return res;
 		}
+	}
+	return false;
+}
+bool cycle_check(std::unordered_map<std::string, std::string> m) {
+	std::vector<std::pair<std::string, std::string>> l;
+
+	for(auto i:m) {
+		std::istringstream iss(i.second);
+		std::string tt;
+		while(iss >> tt) {
+			l.push_back({i.first, tt});
+		}
+	}
+	for(auto i: l) {
+		bool res = rec_check(l, i.second, i.first);
+		if(res) return res;
 	}
 	return false;
 }

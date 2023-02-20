@@ -18,7 +18,7 @@ unordered_map<string, string> map;
 %%
 
 "#def " {BEGIN(DEFINE); return 1;}
-<DEFINE>[a-zA-Z]+ {key = yytext; map[key]="1"; return 1;}
+<DEFINE>[a-zA-Z0-9_]+ {key = yytext; map[key]="1"; return 1;}
 <DEFINE>[\n]+ {BEGIN(INITIAL); return 1;}
 <DEFINE>" " {BEGIN(DEFINE2); return 1;}
 <DEFINE2>[^\\\n]+ {if(map[key] == "1") map[key] = ""; map[key] += yytext; return 5;}
@@ -39,6 +39,6 @@ unordered_map<string, string> map;
 <comment2>. /* om nom */
 <comment2>[ \n]+ {BEGIN(INITIAL);}
 
-[a-zA-Z]+ {return 3;}
+[a-zA-Z0-9_]+ {return 3;}
 . {return 4;}
 %%
