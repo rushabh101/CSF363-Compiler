@@ -5,7 +5,6 @@
 #include <cstdio>
 #include <cstring>
 #include <fstream>
-#include <sstream>
 #include <regex>
 
 #include "parser.hh"
@@ -88,11 +87,13 @@ bool cycle_check(std::unordered_map<std::string, std::string> m)
 
 	for (auto i : m)
 	{
-		std::regex rgx(" -+*/=<>;");
+		std::regex rgx("[ -+/*=<>;]+");
 		std::sregex_token_iterator iter(i.second.begin(), i.second.end(), rgx, -1);
 		std::sregex_token_iterator end;
 		for (; iter != end; ++iter)
+		{
 			l.push_back({i.first, *iter});
+		}
 	}
 	for (auto i : l)
 	{

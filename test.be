@@ -1,7 +1,8 @@
 #def abc bd
 #def r q
+#def c MAC
 #def NUM 10
-#def MAC let r =NUM; \
+#def MAC let r =10*c; \
 dbg r;
 
 #def AA
