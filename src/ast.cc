@@ -12,16 +12,34 @@ NodeBinOp::NodeBinOp(NodeBinOp::Op ope, Node *leftptr, Node *rightptr) {
 
 std::string NodeBinOp::to_string() {
     std::string out = "(";
-    switch(op) {
-        case PLUS: out += '+'; break;
-        case MINUS: out += '-'; break;
-        case MULT: out += '*'; break;
-        case DIV: out += '/'; break;
+    switch (op) {
+        case PLUS:
+            out += '+';
+            break;
+        case MINUS:
+            out += '-';
+            break;
+        case MULT:
+            out += '*';
+            break;
+        case DIV:
+            out += '/';
+            break;
     }
 
     out += ' ' + left->to_string() + ' ' + right->to_string() + ')';
 
     return out;
+}
+
+NodeTernOp::NodeTernOp(Node *leftptr, Node *midptr, Node *rightptr) {
+    left = leftptr;
+    mid = midptr;
+    right = rightptr;
+}
+
+std::string NodeTernOp::to_string() {
+    return left->to_string() + '?' + mid->to_string() + ':' + right->to_string();
 }
 
 NodeInt::NodeInt(int val) {
@@ -35,7 +53,7 @@ std::string NodeInt::to_string() {
 
 NodeStmts::NodeStmts() {
     type = STMTS;
-    list = std::vector<Node*>();
+    list = std::vector<Node *>();
 }
 
 void NodeStmts::push_back(Node *node) {
@@ -44,7 +62,7 @@ void NodeStmts::push_back(Node *node) {
 
 std::string NodeStmts::to_string() {
     std::string out = "(begin";
-    for(auto i : list) {
+    for (auto i : list) {
         out += " " + i->to_string();
     }
 
@@ -61,6 +79,10 @@ NodeAssn::NodeAssn(std::string id, Node *expr) {
 
 std::string NodeAssn::to_string() {
     return "(let " + identifier + " " + expression->to_string() + ")";
+}
+
+std::string NodeAAssn::to_string() {
+    return '(' + identifier + ' ' + expression->to_string() + ')';
 }
 
 NodeDebug::NodeDebug(Node *expr) {

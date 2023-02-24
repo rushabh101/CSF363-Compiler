@@ -1,17 +1,20 @@
 #include "llvmcodegen.hh"
-#include "ast.hh"
-#include <iostream>
-#include <llvm/Support/FileSystem.h>
+
+#include <llvm/Bitcode/BitcodeWriter.h>
+#include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
-#include <llvm/IR/Instructions.h>
-#include <llvm/IR/Module.h>
-#include <llvm/IR/BasicBlock.h>
 #include <llvm/IR/DerivedTypes.h>
 #include <llvm/IR/GlobalValue.h>
+#include <llvm/IR/Instructions.h>
+#include <llvm/IR/Module.h>
 #include <llvm/IR/Verifier.h>
-#include <llvm/Bitcode/BitcodeWriter.h>
+#include <llvm/Support/FileSystem.h>
+
+#include <iostream>
 #include <vector>
+
+#include "ast.hh"
 
 #define MAIN_FUNC compiler->module.getFunction("main")
 
@@ -26,15 +29,13 @@ void LLVMCompiler::compile(Node *root) {
     FunctionType *printi_func_type = FunctionType::get(
         builder.getVoidTy(),
         {builder.getInt32Ty()},
-        false
-    );
+        false);
     Function::Create(
         printi_func_type,
         GlobalValue::ExternalLinkage,
         "printi",
-        &module
-    );
-    /* we can get this later 
+        &module);
+    /* we can get this later
         module.getFunction("printi");
     */
 
@@ -47,15 +48,13 @@ void LLVMCompiler::compile(Node *root) {
         main_func_type,
         GlobalValue::ExternalLinkage,
         "main",
-        &module
-    );
+        &module);
 
     // create main function block
     BasicBlock *main_func_entry_bb = BasicBlock::Create(
         *context,
         "entry",
-        main_func
-    );
+        main_func);
 
     // move the builder to the start of the main function block
     builder.SetInsertPoint(main_func_entry_bb);
@@ -80,12 +79,12 @@ void LLVMCompiler::write(std::string file_name) {
 
 //  ┌―――――――――――――――――――――┐  //
 //  │ AST -> LLVM Codegen │  //
-// └―――――――――――――――――――――┘   //
+//  └―――――――――――――――――――――┘  //
 
 // codegen for statements
 Value *NodeStmts::llvm_codegen(LLVMCompiler *compiler) {
     Value *last = nullptr;
-    for(auto node : list) {
+    for (auto node : list) {
         last = node->llvm_codegen(compiler);
     }
 
@@ -109,32 +108,40 @@ Value *NodeBinOp::llvm_codegen(LLVMCompiler *compiler) {
     Value *left_expr = left->llvm_codegen(compiler);
     Value *right_expr = right->llvm_codegen(compiler);
 
-    switch(op) {
+    switch (op) {
         case PLUS:
-        return compiler->builder.CreateAdd(left_expr, right_expr, "addtmp");
+            return compiler->builder.CreateAdd(left_expr, right_expr, "addtmp");
         case MINUS:
-        return compiler->builder.CreateSub(left_expr, right_expr, "minustmp");
+            return compiler->builder.CreateSub(left_expr, right_expr, "minustmp");
         case MULT:
-        return compiler->builder.CreateMul(left_expr, right_expr, "multtmp");
+            return compiler->builder.CreateMul(left_expr, right_expr, "multtmp");
         case DIV:
-        return compiler->builder.CreateSDiv(left_expr, right_expr, "divtmp");
+            return compiler->builder.CreateSDiv(left_expr, right_expr, "divtmp");
     }
 }
 
+Value *NodeTernOp::llvm_codegen(LLVMCompiler *compiler) {
+    // TODO
+    return nullptr;
+}
 
 Value *NodeAssn::llvm_codegen(LLVMCompiler *compiler) {
     Value *expr = expression->llvm_codegen(compiler);
 
     IRBuilder<> temp_builder(
         &MAIN_FUNC->getEntryBlock(),
-        MAIN_FUNC->getEntryBlock().begin()
-    );
+        MAIN_FUNC->getEntryBlock().begin());
 
     AllocaInst *alloc = temp_builder.CreateAlloca(compiler->builder.getInt32Ty(), 0, identifier);
 
     compiler->locals[identifier] = alloc;
 
     return compiler->builder.CreateStore(expr, alloc);
+}
+
+Value *NodeAAssn::llvm_codegen(LLVMCompiler *compiler) {
+    // TODO
+    return nullptr;
 }
 
 Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
