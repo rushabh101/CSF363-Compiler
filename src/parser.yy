@@ -29,6 +29,7 @@ int yyerror(std::string msg);
 %token <lexeme> TINT_LIT TIDENT
 %token INT TLET TDBG
 %token TSCOL TLPAREN TRPAREN TEQUAL
+%token TQM TCOLON
 
 %type <node> Expr Stmt
 %type <stmts> Program StmtList
