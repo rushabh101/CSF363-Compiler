@@ -70,13 +70,8 @@ Stmt : TLET TIDENT TEQUAL Expr
      }
      | TIDENT TEQUAL Expr
      {
-
         if(symbol_table.contains($1)) {
-            
-           
-
             $$ = new NodeAAssn($1, $3);
-            
         } else {
             
             yyerror("attempt to assign value to undeclared variable.\n");
@@ -104,7 +99,7 @@ Expr : TINT_LIT
      { $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); }
      | TLPAREN Expr TRPAREN
      { $$ = $2; }
-     | Expr TQM Exr TCOLON Expr
+     | Expr TQM Expr TCOLON Expr
      { $$ = new NodeTernOp($1, $3, $5); }
      ;
 

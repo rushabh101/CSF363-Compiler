@@ -11,6 +11,9 @@ dbg abc + abc;
 dbg 10;
 #endif
 
+let z = 3;
+z = 0 ? 3+1*2 : 4;
+
 /* sakdflj */
 // one line is all I need
 

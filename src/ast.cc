@@ -33,13 +33,14 @@ std::string NodeBinOp::to_string() {
 }
 
 NodeTernOp::NodeTernOp(Node *leftptr, Node *midptr, Node *rightptr) {
+    type = TERN_OP;
     left = leftptr;
     mid = midptr;
     right = rightptr;
 }
 
 std::string NodeTernOp::to_string() {
-    return left->to_string() + '?' + mid->to_string() + ':' + right->to_string();
+    return '(' + left->to_string() + '?' + mid->to_string() + ':' + right->to_string() + ')';
 }
 
 NodeInt::NodeInt(int val) {
@@ -79,6 +80,12 @@ NodeAssn::NodeAssn(std::string id, Node *expr) {
 
 std::string NodeAssn::to_string() {
     return "(let " + identifier + " " + expression->to_string() + ")";
+}
+
+NodeAAssn::NodeAAssn(std::string id, Node *expr) {
+    type = AASSN;
+    identifier = id;
+    expression = expr;
 }
 
 std::string NodeAAssn::to_string() {

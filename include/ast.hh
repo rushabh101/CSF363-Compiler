@@ -18,7 +18,9 @@ struct Node {
         STMTS,
         ASSN,
         DBG,
-        IDENT
+        IDENT,
+        TERN_OP,
+        AASSN
     } type;
 
     virtual std::string to_string() = 0;
@@ -86,7 +88,11 @@ struct NodeAssn : public Node {
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
-struct NodeAAssn : public NodeAssn {
+struct NodeAAssn : public Node {
+    std::string identifier;
+    Node *expression;
+
+    NodeAAssn(std::string id, Node *expr);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
