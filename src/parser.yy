@@ -68,7 +68,18 @@ Stmt : TLET TIDENT TEQUAL Expr
      }
      | TIDENT TEQUAL Expr
      {
-        $$ = new NodeAAssn($1, $3);
+
+        if(symbol_table.contains($1)) {
+            
+           
+
+            $$ = new NodeAAssn($1, $3);
+            
+        } else {
+            
+            yyerror("attempt to assign value to undeclared variable.\n");
+        }
+        
      }
      ;
 
