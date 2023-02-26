@@ -1,14 +1,11 @@
 #def abc bd
-#def r q
-#def c MAC
-#def NUM 10
-#def MAC let r =10*c; \
+#def MAC let r =10; \
 dbg r;
 
 #def AA
 
 #ifdef abc
-let abc = 123 * 20 + 20 + (22 / 2) - AA;
+let abc = 123 - AA * 10;
 dbg abc + abc;
 #else
 dbg 10;

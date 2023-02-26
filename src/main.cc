@@ -142,8 +142,8 @@ void preprocess() {
     } while (token != 0);
 
     // Printing final preprocessed code
-    std::cout << "PRE" << std::endl
-              << contents << std::endl;
+    // std::cout << "PRE" << std::endl
+    //           << contents << std::endl;
 
     fclose(fooin);
 

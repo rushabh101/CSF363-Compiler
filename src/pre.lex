@@ -58,8 +58,8 @@ unordered_map<string, string> map;
 <ifdefMacro>"#else" {BEGIN(trueSkipMacro);}
 <skipMacro>"#else" {BEGIN(ifdefMacro);}
 <ifdefMacro,skipMacro,trueSkipMacro>"#endif" {BEGIN(INITIAL);}
-<trueSkipMacro,skipMacro>[.\n]*
+<trueSkipMacro,skipMacro>.|\n {}
 
 [a-zA-Z0-9_]+ {return 3;}
-. {return 4;}
+.|\n {return 4;}
 %%
