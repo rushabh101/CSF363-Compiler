@@ -34,8 +34,10 @@ int yyerror(std::string msg);
 %type <node> Expr Stmt
 %type <stmts> Program StmtList
 
+%left TQM TCOLON
 %left TPLUS TDASH
 %left TSTAR TSLASH
+
 
 %%
 
