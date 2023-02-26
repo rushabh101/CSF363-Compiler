@@ -66,6 +66,10 @@ Stmt : TLET TIDENT TEQUAL Expr
      { 
         $$ = new NodeDebug($2);
      }
+     | TIDENT TEQUAL Expr
+     {
+        $$ = new NodeAAssn($1, $3);
+     }
      ;
 
 Expr : TINT_LIT               
@@ -85,7 +89,10 @@ Expr : TINT_LIT
      { $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); }
      | Expr TSLASH Expr
      { $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); }
-     | TLPAREN Expr TRPAREN { $$ = $2; }
+     | TLPAREN Expr TRPAREN
+     { $$ = $2; }
+     | Expr TQM Exr TCOLON Expr
+     { $$ = new NodeTernOp($1, $3, $5); }
      ;
 
 %%
