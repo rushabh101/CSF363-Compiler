@@ -29,9 +29,13 @@ int yyerror(std::string msg);
 %token <lexeme> TINT_LIT TIDENT
 %token INT TLET TDBG
 %token TSCOL TLPAREN TRPAREN TEQUAL
+%token TQM TCOLON
+%token SHORT LONG
 
-%type <node> Expr Stmt
+%type <node> Expr Stmt Dtype
 %type <stmts> Program StmtList
+
+
 
 %left TPLUS TDASH
 %left TSTAR TSLASH
@@ -50,7 +54,7 @@ StmtList : Stmt
          { $$->push_back($3); }
 	     ;
 
-Stmt : TLET TIDENT TEQUAL Expr
+Stmt : TLET TIDENT TCOLON Dtype TEQUAL Expr
      {
         if(symbol_table.contains($2)) {
             // tried to redeclare variable, so error
@@ -58,7 +62,7 @@ Stmt : TLET TIDENT TEQUAL Expr
         } else {
             symbol_table.insert($2);
 
-            $$ = new NodeDecl($2, $4);
+            $$ = new NodeDecl($2, $6);
         }
      }
      | TDBG Expr
@@ -66,6 +70,9 @@ Stmt : TLET TIDENT TEQUAL Expr
         $$ = new NodeDebug($2);
      }
      ;
+
+Dtype : INT|LONG|SHORT
+     { $$ = new NodeDtype($1); }
 
 Expr : TINT_LIT               
      { $$ = new NodeInt(stoi($1)); }
