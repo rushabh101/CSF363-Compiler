@@ -26,7 +26,7 @@ void LLVMCompiler::compile(Node *root) {
     // void printi();
     FunctionType *printi_func_type = FunctionType::get(
         builder.getVoidTy(),
-        {builder.getInt32Ty()},
+        {builder.getInt64Ty()},
         false
     );
     Function::Create(
@@ -95,15 +95,24 @@ Value *NodeStmts::llvm_codegen(LLVMCompiler *compiler) {
 
 Value *NodeDebug::llvm_codegen(LLVMCompiler *compiler) {
     Value *expr = expression->llvm_codegen(compiler);
+    Value *temp = compiler->builder.CreateIntCast(expr, compiler->builder.getInt64Ty(), true);
 
     Function *printi_func = compiler->module.getFunction("printi");
-    compiler->builder.CreateCall(printi_func, {expr});
+    compiler->builder.CreateCall(printi_func, {temp});
 
     return expr;
 }
 
 Value *NodeInt::llvm_codegen(LLVMCompiler *compiler) {
-    return compiler->builder.getInt16(value);
+    if(std::abs(value) <= 32767) {
+        return compiler->builder.getInt16(value);
+    }
+    else if(std::abs(value) <= 2147483647){
+        return compiler->builder.getInt32(value);
+    }
+    else {
+        return compiler->builder.getInt64(value);
+    }
 }
 
 Value *NodeBinOp::llvm_codegen(LLVMCompiler *compiler) {
@@ -131,24 +140,25 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
         MAIN_FUNC->getEntryBlock().begin()
     );
 
-    AllocaInst *alloc = temp_builder.CreateAlloca(compiler->builder.getInt32Ty(), 0, identifier);
+    AllocaInst *alloc = temp_builder.CreateAlloca(compiler->builder.getInt16Ty(), 0, identifier);
 
     compiler->locals[identifier] = alloc;
-    // std::cout<<"DEBUG: "<<expr->getType()<<std::endl;
-    Value *temp = compiler->builder.CreateZExt(expr, compiler->builder.getInt32Ty());
-    // std::cout<<"DEBUG: "<<temp->getType()->name<<std::endl;
+    // Value *temp = compiler->builder.CreateIntCast(expr, compiler->builder.getInt32Ty(), true);
+
     std::string type_str;
     llvm::raw_string_ostream rso(type_str);
-    temp->getType()->print(rso);
-    std::cout<<rso.str();
-    return compiler->builder.CreateStore(temp, alloc);
+    expr->getType()->print(rso);
+    // std::cout<<stoi(rso.str().substr(1,2))<<std::endl; //changing i32 to 32 (int)
+    std::cout<<rso.str()<<std::endl; //changing i32 to 32 (int)
+
+    return compiler->builder.CreateStore(expr, alloc); // Apparently it implicitly converts now, idk what changed
 }
 
 Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
     AllocaInst *alloc = compiler->locals[identifier];
 
     // if your LLVM_MAJOR_VERSION >= 14
-    return compiler->builder.CreateLoad(compiler->builder.getInt32Ty(), alloc, identifier);
+    return compiler->builder.CreateLoad(alloc->getAllocatedType(), alloc, identifier);
 }
 
 #undef MAIN_FUNC

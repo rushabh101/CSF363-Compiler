@@ -32,7 +32,7 @@ int yyerror(std::string msg);
 %token TQM TCOLON
 %token SHORT LONG
 
-%type <node> Expr Stmt Dtype
+%type <node> Expr Stmt
 %type <stmts> Program StmtList
 
 
@@ -54,7 +54,7 @@ StmtList : Stmt
          { $$->push_back($3); }
 	     ;
 
-Stmt : TLET TIDENT TCOLON Dtype TEQUAL Expr
+Stmt : TLET TIDENT TCOLON INT TEQUAL Expr
      {
         if(symbol_table.contains($2)) {
             // tried to redeclare variable, so error
@@ -71,11 +71,8 @@ Stmt : TLET TIDENT TCOLON Dtype TEQUAL Expr
      }
      ;
 
-Dtype : INT|LONG|SHORT
-     { $$ = new NodeDtype($1); }
-
 Expr : TINT_LIT               
-     { $$ = new NodeInt(stoi($1)); }
+     { $$ = new NodeInt(stoll($1)); }
      | TIDENT
      { 
         if(symbol_table.contains($1))

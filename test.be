@@ -1,2 +1,3 @@
-let abc = 1;
-dbg abc;
+let abc : int = 20000;
+let c : int = abc;
+dbg c;

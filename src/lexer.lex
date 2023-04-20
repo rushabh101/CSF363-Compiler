@@ -14,6 +14,7 @@ extern int yyerror(std::string msg);
 "*"       { return TSTAR; }
 "/"       { return TSLASH; }
 ";"       { return TSCOL; }
+":"       { return TCOLON; }
 "("       { return TLPAREN; }
 ")"       { return TRPAREN; }
 "="       { return TEQUAL; }

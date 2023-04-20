@@ -24,7 +24,7 @@ std::string NodeBinOp::to_string() {
     return out;
 }
 
-NodeInt::NodeInt(int val) {
+NodeInt::NodeInt(long long val) {
     type = INT_LIT;
     value = val;
 }
