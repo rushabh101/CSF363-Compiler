@@ -1,6 +1,7 @@
 #include "llvmcodegen.hh"
 #include "ast.hh"
 #include <iostream>
+#include <string>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
@@ -102,7 +103,7 @@ Value *NodeDebug::llvm_codegen(LLVMCompiler *compiler) {
 }
 
 Value *NodeInt::llvm_codegen(LLVMCompiler *compiler) {
-    return compiler->builder.getInt32(value);
+    return compiler->builder.getInt16(value);
 }
 
 Value *NodeBinOp::llvm_codegen(LLVMCompiler *compiler) {
@@ -133,8 +134,14 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     AllocaInst *alloc = temp_builder.CreateAlloca(compiler->builder.getInt32Ty(), 0, identifier);
 
     compiler->locals[identifier] = alloc;
-
-    return compiler->builder.CreateStore(expr, alloc);
+    // std::cout<<"DEBUG: "<<expr->getType()<<std::endl;
+    Value *temp = compiler->builder.CreateZExt(expr, compiler->builder.getInt32Ty());
+    // std::cout<<"DEBUG: "<<temp->getType()->name<<std::endl;
+    std::string type_str;
+    llvm::raw_string_ostream rso(type_str);
+    temp->getType()->print(rso);
+    std::cout<<rso.str();
+    return compiler->builder.CreateStore(temp, alloc);
 }
 
 Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
