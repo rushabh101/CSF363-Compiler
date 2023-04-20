@@ -1,6 +1,7 @@
 #include "llvmcodegen.hh"
 #include "ast.hh"
 #include <iostream>
+#include <string>
 #include <llvm/Support/FileSystem.h>
 #include <llvm/IR/Constant.h>
 #include <llvm/IR/Constants.h>
@@ -136,7 +137,10 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     // std::cout<<"DEBUG: "<<expr->getType()<<std::endl;
     Value *temp = compiler->builder.CreateZExt(expr, compiler->builder.getInt32Ty());
     // std::cout<<"DEBUG: "<<temp->getType()->name<<std::endl;
-    temp->getType()->dump();
+    std::string type_str;
+    llvm::raw_string_ostream rso(type_str);
+    temp->getType()->print(rso);
+    std::cout<<rso.str();
     return compiler->builder.CreateStore(temp, alloc);
 }
 
