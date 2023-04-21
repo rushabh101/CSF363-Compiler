@@ -60,7 +60,7 @@ Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
             yyerror("tried to redeclare function.\n");
         } else {
             func_table.insert($2);
-            $$ = new NodeFunc($2, $8);
+            $$ = new NodeFunc($2, $6 ,$8);
         }
      }
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL

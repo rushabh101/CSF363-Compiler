@@ -176,4 +176,31 @@ Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
     return compiler->builder.CreateLoad(alloc->getAllocatedType(), alloc, identifier);
 }
 
+Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
+    FunctionType *main_func_type = FunctionType::get(
+        compiler->builder.getInt32Ty(), {}, false /* is vararg */
+    );
+    Function *main_func = Function::Create(
+        main_func_type,
+        GlobalValue::ExternalLinkage,
+        "main",
+        &(compiler->module)
+    );
+
+    // create main function block
+    BasicBlock *main_func_entry_bb = BasicBlock::Create(
+        *(compiler->context),
+        "entry",
+        main_func
+    );
+
+    // move the builder to the start of the main function block
+    compiler->builder.SetInsertPoint(main_func_entry_bb);
+
+    // root->llvm_codegen(this);
+
+    // return 0;
+    compiler->builder.CreateRet(compiler->builder.getInt32(0));
+}
+
 #undef MAIN_FUNC

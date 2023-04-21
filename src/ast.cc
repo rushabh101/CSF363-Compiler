@@ -80,7 +80,8 @@ std::string NodeIdent::to_string() {
     return identifier;
 }
 
-NodeFunc::NodeFunc(std::string ident, Node *stmts) {
+NodeFunc::NodeFunc(std::string ident, std::string d, Node *stmts) {
     identifier = ident;
+    dtype = d;
     stmtlist = stmts;
 }
