@@ -67,6 +67,20 @@ void LLVMCompiler::compile(Node *root) {
     builder.CreateRet(builder.getInt32(0));
 }
 
+Type* gType(std::string dtype, LLVMCompiler *compiler)  {
+    Type *ty;
+    if(compiler->type_scope[dtype] == 16) {
+        ty = compiler->builder.getInt16Ty();
+    }
+    else if(compiler->type_scope[dtype] == 32) {
+        ty = compiler->builder.getInt32Ty();
+    }
+    else {
+        ty = compiler->builder.getInt64Ty();
+    }
+    return ty;
+}
+
 void LLVMCompiler::dump() {
     outs() << module;
 }
@@ -140,22 +154,12 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
         MAIN_FUNC->getEntryBlock().begin()
     );
 
-    Type *ty;
-    if(compiler->type_scope[dtype] == 16) {
-        ty = compiler->builder.getInt16Ty();
-    }
-    else if(compiler->type_scope[dtype] == 32) {
-        ty = compiler->builder.getInt32Ty();
-    }
-    else {
-        ty = compiler->builder.getInt64Ty();
-    }
+    Type *ty = gType(dtype, compiler);
 
     AllocaInst *alloc = temp_builder.CreateAlloca(ty, 0, identifier);
 
 
     compiler->locals[identifier] = alloc;
-    Value *temp = compiler->builder.CreateIntCast(expr, ty, true);
 
     std::string type_str;
     llvm::raw_string_ostream rso(type_str);
@@ -166,7 +170,9 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
         std::cerr << "Error: Value bigger datatype than assignment" << std::endl;
         exit(1);
     }
-    return compiler->builder.CreateStore(temp, alloc); // Apparently it implicitly converts now, idk what changed
+
+    Value *temp = compiler->builder.CreateIntCast(expr, ty, true);
+    return compiler->builder.CreateStore(temp, alloc);
 }
 
 Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
@@ -174,6 +180,35 @@ Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
 
     // if your LLVM_MAJOR_VERSION >= 14
     return compiler->builder.CreateLoad(alloc->getAllocatedType(), alloc, identifier);
+}
+
+Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
+    Type *ty = gType(dtype, compiler);
+    FunctionType *main_func_type = FunctionType::get(
+        ty, {}, false /* is vararg */
+    );
+    Function *main_func = Function::Create(
+        main_func_type,
+        GlobalValue::ExternalLinkage,
+        identifier,
+        &(compiler->module)
+    );
+
+    // create main function block
+    BasicBlock *main_func_entry_bb = BasicBlock::Create(
+        *(compiler->context),
+        "entry",
+        main_func
+    );
+
+    // move the builder to the start of the main function block
+    compiler->builder.SetInsertPoint(main_func_entry_bb);
+
+    Value *r = stmtlist->llvm_codegen(compiler);
+    // return 0;
+    compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
+
+    return r;
 }
 
 #undef MAIN_FUNC
