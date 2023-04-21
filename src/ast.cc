@@ -85,3 +85,7 @@ NodeFunc::NodeFunc(std::string ident, std::string d, Node *stmts) {
     dtype = d;
     stmtlist = stmts;
 }
+
+std::string NodeFunc::to_string() {
+    return nullptr;
+}
