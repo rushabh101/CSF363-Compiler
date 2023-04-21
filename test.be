@@ -1,3 +1,3 @@
 let abc : int = 20000;
-let c : int = abc;
+let c : short = abc;
 dbg c;

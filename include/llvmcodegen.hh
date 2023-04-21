@@ -21,9 +21,17 @@ struct LLVMCompiler {
     IRBuilder<> builder;
     Module module;
     std::unordered_map<std::string, AllocaInst*> locals;
+    std::unordered_map<std::string, int> type_scope;
     
     LLVMCompiler(LLVMContext *context, std::string file_name) : 
-        context(context), builder(*context), module(file_name, *context) {}
+        context(context), builder(*context), module(file_name, *context) {
+        type_scope["i16"] = 16;
+        type_scope["i32"] = 32;
+        type_scope["i64"] = 64;
+        type_scope["short"] = 16;
+        type_scope["int"] = 32;
+        type_scope["long"] = 64;
+    }
     
     void compile(Node *root);
     void dump();

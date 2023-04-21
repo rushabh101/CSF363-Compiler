@@ -26,11 +26,10 @@ int yyerror(std::string msg);
 }
 
 %token TPLUS TDASH TSTAR TSLASH
-%token <lexeme> TINT_LIT TIDENT
-%token INT TLET TDBG
+%token <lexeme> TINT_LIT TIDENT DTYPE
+%token TLET TDBG
 %token TSCOL TLPAREN TRPAREN TEQUAL
 %token TQM TCOLON
-%token SHORT LONG
 
 %type <node> Expr Stmt
 %type <stmts> Program StmtList
@@ -54,15 +53,14 @@ StmtList : Stmt
          { $$->push_back($3); }
 	     ;
 
-Stmt : TLET TIDENT TCOLON INT TEQUAL Expr
+Stmt : TLET TIDENT TCOLON DTYPE TEQUAL Expr
      {
         if(symbol_table.contains($2)) {
             // tried to redeclare variable, so error
             yyerror("tried to redeclare variable.\n");
         } else {
             symbol_table.insert($2);
-
-            $$ = new NodeDecl($2, $6);
+            $$ = new NodeDecl($2, $6, $4);
         }
      }
      | TDBG Expr
@@ -94,6 +92,6 @@ Expr : TINT_LIT
 %%
 
 int yyerror(std::string msg) {
-    std::cerr << "Error! " << msg << std::endl;
+    std::cerr << "Error: Invalid Syntax " << msg << std::endl;
     exit(1);
 }

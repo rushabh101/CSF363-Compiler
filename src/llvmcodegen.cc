@@ -140,7 +140,16 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
         MAIN_FUNC->getEntryBlock().begin()
     );
 
-    AllocaInst *alloc = temp_builder.CreateAlloca(compiler->builder.getInt16Ty(), 0, identifier);
+    AllocaInst *alloc;
+    if(compiler->type_scope[dtype] == 16) {
+        alloc = temp_builder.CreateAlloca(compiler->builder.getInt16Ty(), 0, identifier);
+    }
+    else if(compiler->type_scope[dtype] == 32) {
+        alloc = temp_builder.CreateAlloca(compiler->builder.getInt32Ty(), 0, identifier);
+    }
+    else {
+        alloc = temp_builder.CreateAlloca(compiler->builder.getInt64Ty(), 0, identifier);
+    }
 
     compiler->locals[identifier] = alloc;
     // Value *temp = compiler->builder.CreateIntCast(expr, compiler->builder.getInt32Ty(), true);
@@ -148,9 +157,12 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     std::string type_str;
     llvm::raw_string_ostream rso(type_str);
     expr->getType()->print(rso);
-    // std::cout<<stoi(rso.str().substr(1,2))<<std::endl; //changing i32 to 32 (int)
-    std::cout<<rso.str()<<std::endl; //changing i32 to 32 (int)
+    std::cout<<identifier<<": "<<rso.str()<<std::endl;
 
+    if(compiler->type_scope[dtype] < compiler->type_scope[rso.str()]) {
+        std::cerr << "Error: Value bigger datatype than assignment" << std::endl;
+        exit(1);
+    }
     return compiler->builder.CreateStore(expr, alloc); // Apparently it implicitly converts now, idk what changed
 }
 
