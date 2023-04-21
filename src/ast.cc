@@ -79,3 +79,8 @@ NodeIdent::NodeIdent(std::string ident) {
 std::string NodeIdent::to_string() {
     return identifier;
 }
+
+NodeFunc::NodeFunc(std::string ident, Node *stmts) {
+    identifier = ident;
+    stmtlist = stmts;
+}

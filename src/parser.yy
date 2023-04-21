@@ -19,7 +19,7 @@ extern int yyparse();
 
 extern NodeStmts* final_values;
 
-SymbolTable symbol_table;
+SymbolTable symbol_table, func_table;
 
 int yyerror(std::string msg);
 
@@ -53,9 +53,15 @@ StmtList : Stmt
          { $$->push_back($2); }
 	     ;
 
-Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL TSCOL
+Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
-
+        if(func_table.contains($2)) {
+            // tried to redeclare function, so error
+            yyerror("tried to redeclare function.\n");
+        } else {
+            func_table.insert($2);
+            $$ = new NodeFunc($2, $8);
+        }
      }
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
