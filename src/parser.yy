@@ -27,8 +27,8 @@ int yyerror(std::string msg);
 
 %token TPLUS TDASH TSTAR TSLASH
 %token <lexeme> TINT_LIT TIDENT DTYPE
-%token TLET TDBG
-%token TSCOL TLPAREN TRPAREN TEQUAL
+%token TLET TDBG TFUN
+%token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL
 %token TQM TCOLON
 
 %type <node> Expr Stmt
@@ -43,17 +43,21 @@ int yyerror(std::string msg);
 
 Program :                
         { final_values = nullptr; }
-        | StmtList TSCOL 
+        | StmtList 
         { final_values = $1; }
 	    ;
 
 StmtList : Stmt                
          { $$ = new NodeStmts(); $$->push_back($1); }
-	     | StmtList TSCOL Stmt 
-         { $$->push_back($3); }
+	     | StmtList Stmt 
+         { $$->push_back($2); }
 	     ;
 
-Stmt : TLET TIDENT TCOLON DTYPE TEQUAL Expr
+Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL TSCOL
+     {
+
+     }
+     | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
         if(symbol_table.contains($2)) {
             // tried to redeclare variable, so error
@@ -63,7 +67,7 @@ Stmt : TLET TIDENT TCOLON DTYPE TEQUAL Expr
             $$ = new NodeDecl($2, $6, $4);
         }
      }
-     | TDBG Expr
+     | TDBG Expr TSCOL
      { 
         $$ = new NodeDebug($2);
      }
