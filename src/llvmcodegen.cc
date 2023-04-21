@@ -158,13 +158,11 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
 
     AllocaInst *alloc = temp_builder.CreateAlloca(ty, 0, identifier);
 
-
     compiler->locals[identifier] = alloc;
 
     std::string type_str;
     llvm::raw_string_ostream rso(type_str);
     expr->getType()->print(rso);
-    std::cout<<identifier<<": "<<rso.str()<<std::endl;
 
     if(compiler->type_scope[dtype] < compiler->type_scope[rso.str()]) {
         std::cerr << "Error: Value bigger datatype than assignment" << std::endl;
@@ -172,6 +170,7 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     }
 
     Value *temp = compiler->builder.CreateIntCast(expr, ty, true);
+
     return compiler->builder.CreateStore(temp, alloc);
 }
 

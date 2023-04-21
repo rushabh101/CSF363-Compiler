@@ -90,7 +90,7 @@ Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
 
         
-        if()
+        // if()
      }
      ;
 

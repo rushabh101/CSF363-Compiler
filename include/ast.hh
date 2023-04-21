@@ -117,7 +117,8 @@ struct NodeIfExpr : public Node {
     NodeIfExpr(std::unique_ptr<Node> Cond, std::unique_ptr<Node> Else)
     : Cond(std::move(Cond)), Else(std::move(Else)) {}
 
-    Value *codegen() override;
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+
 };
 
 
