@@ -20,6 +20,8 @@ extern int yyerror(std::string msg);
 "{"       { return TLCURL; }
 "}"       { return TRCURL; }
 "="       { return TEQUAL; }
+"if"      { return TIF; }
+"else"    { return TELSE; }
 "dbg"     { return TDBG; }
 "let"     { return TLET; }
 "fun"     { return TFUN; }
@@ -44,6 +46,8 @@ std::string token_to_string(int token, const char *lexeme) {
         case TLCURL: s = "TLCURL"; break;
         case TRCURL: s = "TRCURL"; break;
         case TEQUAL: s = "TEQUAL"; break;
+        case TIF: s = "TIF"; break;
+        case TELSE: s = "TELSE"; break;
         
         case TDBG: s = "TDBG"; break;
         case TLET: s = "TLET"; break;

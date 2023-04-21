@@ -30,6 +30,7 @@ int yyerror(std::string msg);
 %token TLET TDBG TFUN
 %token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL
 %token TQM TCOLON
+%token TIF TELSE 
 
 %type <node> Expr Stmt
 %type <stmts> Program StmtList
@@ -70,6 +71,12 @@ Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL TSCOL
      | TDBG Expr TSCOL
      { 
         $$ = new NodeDebug($2);
+     }
+     |TIF Expr TLCURL StmtList TRCURL TELSE TLCURL StmtList TRCURL
+     {
+
+        
+        if()
      }
      ;
 

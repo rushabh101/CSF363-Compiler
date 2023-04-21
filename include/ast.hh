@@ -93,5 +93,15 @@ struct NodeIdent : public Node {
 };
 
 
+struct NodeIfExpr : public Node {
+    std::unique_ptr<Node> Cond, Else;
+
+    NodeIfExpr(std::unique_ptr<Node> Cond, std::unique_ptr<Node> Else)
+    : Cond(std::move(Cond)), Else(std::move(Else)) {}
+
+    Value *codegen() override;
+};
+
+
 
 #endif
