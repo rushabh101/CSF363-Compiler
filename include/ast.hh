@@ -102,6 +102,14 @@ struct NodeFunc : public Node {
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
+struct NodeCall : public Node {
+    std::string identifier;
+
+    NodeCall(std::string ident);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
 
 struct NodeIfExpr : public Node {
     std::unique_ptr<Node> Cond, Else;

@@ -64,6 +64,14 @@ Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
             $$ = new NodeFunc($2, $6 ,$8);
         }
      }
+     | TIDENT TLPAREN TRPAREN TSCOL
+     {
+        if(!func_table.contains($1)) {
+            yyerror("Function not declared.\n");
+        }
+
+        $$ = new NodeCall($1);
+     }
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
         if(symbol_table.contains($2)) {

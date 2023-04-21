@@ -87,5 +87,13 @@ NodeFunc::NodeFunc(std::string ident, std::string d, Node *stmts) {
 }
 
 std::string NodeFunc::to_string() {
-    return nullptr;
+    return "(fun " + dtype + " " + identifier + " " + stmtlist->to_string() + ")";
+}
+
+NodeCall::NodeCall(std::string ident) {
+    identifier = ident;
+}
+
+std::string NodeCall::to_string() {
+    return "(call " + identifier + " ())"; 
 }

@@ -41,30 +41,30 @@ void LLVMCompiler::compile(Node *root) {
 
     /* Main Function */
     // int main();
-    FunctionType *main_func_type = FunctionType::get(
-        builder.getInt32Ty(), {}, false /* is vararg */
-    );
-    Function *main_func = Function::Create(
-        main_func_type,
-        GlobalValue::ExternalLinkage,
-        "main",
-        &module
-    );
+    // FunctionType *main_func_type = FunctionType::get(
+    //     builder.getInt32Ty(), {}, false /* is vararg */
+    // );
+    // Function *main_func = Function::Create(
+    //     main_func_type,
+    //     GlobalValue::ExternalLinkage,
+    //     "main",
+    //     &module
+    // );
 
-    // create main function block
-    BasicBlock *main_func_entry_bb = BasicBlock::Create(
-        *context,
-        "entry",
-        main_func
-    );
+    // // create main function block
+    // BasicBlock *main_func_entry_bb = BasicBlock::Create(
+    //     *context,
+    //     "entry",
+    //     main_func
+    // );
 
-    // move the builder to the start of the main function block
-    builder.SetInsertPoint(main_func_entry_bb);
+    // // move the builder to the start of the main function block
+    // builder.SetInsertPoint(main_func_entry_bb);
 
     root->llvm_codegen(this);
 
-    // return 0;
-    builder.CreateRet(builder.getInt32(0));
+    // // return 0;
+    // builder.CreateRet(builder.getInt32(0));
 }
 
 Type* gType(std::string dtype, LLVMCompiler *compiler)  {
@@ -187,6 +187,8 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     FunctionType *main_func_type = FunctionType::get(
         ty, {}, false /* is vararg */
     );
+
+    std::cout<<"DEBUG: function type done"<<std::endl;
     Function *main_func = Function::Create(
         main_func_type,
         GlobalValue::ExternalLinkage,
@@ -194,12 +196,16 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
         &(compiler->module)
     );
 
+    std::cout<<"DEBUG: function actually done"<<std::endl;
+
     // create main function block
     BasicBlock *main_func_entry_bb = BasicBlock::Create(
         *(compiler->context),
         "entry",
         main_func
     );
+
+    std::cout<<"DEBUG: function Block made"<<std::endl;
 
     // move the builder to the start of the main function block
     compiler->builder.SetInsertPoint(main_func_entry_bb);
@@ -209,6 +215,11 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
 
     return r;
+}
+
+Value *NodeCall::llvm_codegen(LLVMCompiler *compiler) {
+    Function *CalleeF = compiler->module.getFunction(identifier);
+    return compiler->builder.CreateCall(CalleeF, {}, "calltmp");
 }
 
 #undef MAIN_FUNC
