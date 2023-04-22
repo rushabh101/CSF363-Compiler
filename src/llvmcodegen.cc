@@ -266,4 +266,57 @@ Value *NodeParams::llvm_codegen(LLVMCompiler *compiler) {
     return nullptr;
 }
 
+Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
+{
+    Value *CondV = Cond->llvm_codegen(compiler);
+    if(!CondV)
+    {
+        return nullptr;
+    }
+
+    // CondV = compiler->builder.CreateFCmpONE(CondV, compiler->builder.getInt32(0), "ifcond");
+
+    Function *TheFunction = compiler->builder.GetInsertBlock()->getParent();
+
+    BasicBlock *ThenBB = BasicBlock::Create(*(compiler->context), "then", TheFunction );
+    BasicBlock *ElseBB = BasicBlock::Create(*(compiler->context), "else");
+    BasicBlock *MergeBB = BasicBlock::Create(*(compiler->context), "ifcont");
+
+
+    compiler->builder.CreateCondBr(CondV, ThenBB, ElseBB);
+
+    compiler->builder.SetInsertPoint(ThenBB);
+
+    Value *ThenV = Then->llvm_codegen(compiler);
+
+    if (!ThenV)
+       {return nullptr;}
+
+    compiler->builder.CreateBr(MergeBB);
+
+
+    ThenBB = compiler->builder.GetInsertBlock();
+
+    compiler->builder.SetInsertPoint(ElseBB);
+
+    Value *ElseV = Else->llvm_codegen(compiler);
+    if (!ElseV)
+    return nullptr;
+
+
+    compiler->builder.CreateBr(MergeBB);
+
+    ElseBB = compiler->builder.GetInsertBlock();
+    compiler->builder.SetInsertPoint(MergeBB);
+    PHINode *PN = compiler->builder.CreatePHI(Type::getInt32Ty(*(compiler->context)), 2, "iftmp");
+
+
+    PN->addIncoming(ThenV, ThenBB);
+    PN->addIncoming(ElseV, ElseBB);
+    return PN;
+
+
+
+ }
+
 #undef MAIN_FUNC

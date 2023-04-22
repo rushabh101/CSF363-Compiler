@@ -146,11 +146,13 @@ struct NodeReturn : public Node {
 
 
 struct NodeIfExpr : public Node {
-    std::unique_ptr<Node> Cond, Else;
+    Node* Cond;
+    Node* Then;
+    Node* Else;
 
-    NodeIfExpr(std::unique_ptr<Node> Cond, std::unique_ptr<Node> Else)
-    : Cond(std::move(Cond)), Else(std::move(Else)) {}
-
+    NodeIfExpr(Node* Cond, Node* Then, Node* Else);
+   
+    std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 
 };

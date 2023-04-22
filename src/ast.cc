@@ -154,3 +154,15 @@ NodeReturn::NodeReturn(Node *expr) {
 std::string NodeReturn::to_string() {
     return "(ret " + expression->to_string() + ")";
 }
+
+NodeIfExpr::NodeIfExpr(Node* cond, Node* then, Node* el)
+{
+    Cond = cond;
+    Then  = then;
+    Else = el;
+}
+
+std::string NodeIfExpr::to_string()
+{
+    return "(if " + Cond->to_string() + " " + Then->to_string() + " " + Else->to_string() + " )";
+}

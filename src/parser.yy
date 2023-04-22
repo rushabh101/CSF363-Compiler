@@ -89,8 +89,8 @@ Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      |TIF Expr TLCURL StmtList TRCURL TELSE TLCURL StmtList TRCURL
      {
 
+        $$ = new NodeIfExpr($2, $4, $8);
         
-        // if()
      }
      | Expr TSCOL
      {
