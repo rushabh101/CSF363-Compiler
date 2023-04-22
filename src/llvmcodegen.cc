@@ -235,9 +235,14 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
 Value *NodeCall::llvm_codegen(LLVMCompiler *compiler) {
     Function *CalleeF = compiler->module.getFunction(identifier);
 
+    if(paramlist->list.size() != CalleeF->arg_size()) {
+        std::cerr<<"ERROR: Number of arguements does not match function"<<std::endl;
+        exit(1);
+    }
     std::vector<Value*> params;
-    for(auto i: paramlist->list) {
-        params.push_back(i->llvm_codegen(compiler));
+    int cnt = 0;
+    for(auto &i: CalleeF->args()) {
+        params.push_back(TypeConversion(paramlist->list[cnt++]->llvm_codegen(compiler), i.getType() ,compiler));
     }
     return compiler->builder.CreateCall(CalleeF, params, "calltmp");
 }

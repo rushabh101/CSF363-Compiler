@@ -67,14 +67,7 @@ Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
             $$ = new NodeFunc($2, $7 ,$9, $4);
         }
      }
-     | TIDENT TLPAREN ParaList TRPAREN TSCOL
-     {
-        if(!func_table.contains($1)) {
-            yyerror("Function not declared.\n");
-        }
-
-        $$ = new NodeCall($1, $3);
-     }
+     
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
         if(symbol_table.contains($2)) {
@@ -99,6 +92,10 @@ Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
         
         // if()
      }
+     | Expr TSCOL
+     {
+        $$ = $1;
+     }
      ;
 
 Expr : TINT_LIT               
@@ -119,6 +116,14 @@ Expr : TINT_LIT
      | Expr TSLASH Expr
      { $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); }
      | TLPAREN Expr TRPAREN { $$ = $2; }
+     | TIDENT TLPAREN ParaList TRPAREN
+     {
+        if(!func_table.contains($1)) {
+            yyerror("Function not declared.\n");
+        }
+
+        $$ = new NodeCall($1, $3);
+     }
      ;
 
 

@@ -1,12 +1,12 @@
-fun moo(b : short) : int {
-    let aa : short = b;
-    dbg aa;
-    ret 1;
+fun moo(b : short, a : int) : int {
+    let aa : int = b;
+    dbg 69;
+    ret aa;
 }
 
 fun main() : int {
     let abc : int = 20000;
     dbg abc;
-    moo(5);
+    moo(5000, 6);
 }
 

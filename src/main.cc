@@ -54,7 +54,6 @@ int main(int argc, char *argv[]) {
 	if (arg_option == ARG_FAIL) {
 		exit(1);
 	}
-
 	std::string file_name(argv[1]);
 	FILE *source = fopen(argv[1], "r");
 
