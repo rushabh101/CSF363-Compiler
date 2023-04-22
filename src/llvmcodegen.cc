@@ -209,14 +209,23 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
         main_func
     );
 
+    int cnt=0;
+    for (auto &i: main_func->args()) {
+        i.setName(arglist->list[cnt++]->identifier);
+    }
     // move the builder to the start of the main function block
     compiler->builder.SetInsertPoint(main_func_entry_bb);
 
-    std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
-    for(auto i: arglist->list) {
-        AllocaInst *alloca = compiler->builder.CreateAlloca(gType(i->dtype, compiler), 0, i->identifier);
-        compiler->builder.CreateStore(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), gType(i->dtype, compiler), true), alloca);
+    std::cout<<"DEBUG: allocation arg memory for "<<identifier<<std::endl;
+    cnt=0;
+    for(auto &i: main_func->args()) {
+        AllocaInst *alloca = CreateEntryBlockAlloca(main_func, i.getName(), gType(arglist->list[cnt++]->dtype, compiler));
+        compiler->builder.CreateStore(&i, alloca);
+        compiler->locals[std::string(i.getName())] = alloca;
+        // compiler->builder.CreateStore(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), gType(i->dtype, compiler), true), alloca);
     }
+
+    std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
     Value *r = stmtlist->llvm_codegen(compiler);
     // return 0;
     compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
