@@ -67,6 +67,13 @@ void LLVMCompiler::compile(Node *root) {
     // builder.CreateRet(builder.getInt32(0));
 }
 
+AllocaInst *CreateEntryBlockAlloca(Function *TheFunction,
+                                          StringRef VarName, Type *ty) {
+  IRBuilder<> TmpB(&TheFunction->getEntryBlock(),
+                   TheFunction->getEntryBlock().begin());
+  return TmpB.CreateAlloca(ty, nullptr, VarName);
+}
+
 Type* gType(std::string dtype, LLVMCompiler *compiler)  {
     Type *ty;
     if(compiler->type_scope[dtype] == 16) {
@@ -149,14 +156,11 @@ Value *NodeBinOp::llvm_codegen(LLVMCompiler *compiler) {
 Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     Value *expr = expression->llvm_codegen(compiler);
 
-    IRBuilder<> temp_builder(
-        &MAIN_FUNC->getEntryBlock(),
-        MAIN_FUNC->getEntryBlock().begin()
-    );
-
     Type *ty = gType(dtype, compiler);
 
-    AllocaInst *alloc = temp_builder.CreateAlloca(ty, 0, identifier);
+    std::cout<<"DEBUG: creating alloca for "<<identifier<<" of type "<<dtype<<std::endl;
+    Function *TheFunction = compiler->builder.GetInsertBlock()->getParent();
+    AllocaInst *alloc = CreateEntryBlockAlloca(TheFunction, identifier, ty);
 
     compiler->locals[identifier] = alloc;
 
@@ -209,6 +213,7 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     // move the builder to the start of the main function block
     compiler->builder.SetInsertPoint(main_func_entry_bb);
 
+    std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
     Value *r = stmtlist->llvm_codegen(compiler);
     // return 0;
     compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
