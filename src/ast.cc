@@ -53,6 +53,53 @@ std::string NodeStmts::to_string() {
     return out;
 }
 
+NodeArgs::NodeArgs() {
+    list = std::vector<NodeArg*>();
+}
+
+void NodeArgs::push_back(NodeArg *node) {
+    list.push_back(node);
+}
+
+std::string NodeArgs::to_string() {
+    std::string out = "(";
+    for(auto i : list) {
+        out += " " + i->to_string();
+    }
+
+    out += ')';
+
+    return out;
+}
+
+NodeArg::NodeArg(std::string id, std::string d) {
+    identifier = id;
+    dtype = d;
+}
+
+NodeParams::NodeParams() {
+    list = std::vector<Node*>();
+}
+
+void NodeParams::push_back(Node *node) {
+    list.push_back(node);
+}
+
+std::string NodeParams::to_string() {
+    std::string out = "(";
+    for(auto i : list) {
+        out += " " + i->to_string();
+    }
+
+    out += ')';
+
+    return out;
+}
+
+std::string NodeArg::to_string() {
+    return "(" + dtype + " " + identifier + ")";
+}
+
 NodeDecl::NodeDecl(std::string id, Node *expr, std::string d) {
     type = ASSN;
     identifier = id;
@@ -80,20 +127,22 @@ std::string NodeIdent::to_string() {
     return identifier;
 }
 
-NodeFunc::NodeFunc(std::string ident, std::string d, Node *stmts) {
+NodeFunc::NodeFunc(std::string ident, std::string d, NodeStmts *stmts, NodeArgs* args) {
     identifier = ident;
     dtype = d;
     stmtlist = stmts;
+    arglist = args;
 }
 
 std::string NodeFunc::to_string() {
-    return "(fun " + dtype + " " + identifier + " " + stmtlist->to_string() + ")";
+    return "(fun " + dtype + " " + identifier + " args" + arglist->to_string() + " body" + stmtlist->to_string() + ")";
 }
 
-NodeCall::NodeCall(std::string ident) {
+NodeCall::NodeCall(std::string ident, NodeParams* params) {
     identifier = ident;
+    paramlist = params;
 }
 
 std::string NodeCall::to_string() {
-    return "(call " + identifier + " ())"; 
+    return "(call " + identifier + " (" + paramlist->to_string() +"))"; 
 }

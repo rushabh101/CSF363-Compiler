@@ -110,7 +110,6 @@ Value *NodeStmts::llvm_codegen(LLVMCompiler *compiler) {
     for(auto node : list) {
         last = node->llvm_codegen(compiler);
     }
-
     return last;
 }
 
@@ -187,19 +186,21 @@ Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
 
 Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     Type *ty = gType(dtype, compiler);
+
+    std::vector<Type*> argsT;
+    for (auto i: arglist->list) {
+        argsT.push_back(gType(i->dtype, compiler));
+    }
     FunctionType *main_func_type = FunctionType::get(
-        ty, {}, false /* is vararg */
+        ty, argsT, false /* is vararg */
     );
 
-    std::cout<<"DEBUG: function type done"<<std::endl;
     Function *main_func = Function::Create(
         main_func_type,
         GlobalValue::ExternalLinkage,
         identifier,
         &(compiler->module)
     );
-
-    std::cout<<"DEBUG: function actually done"<<std::endl;
 
     // create main function block
     BasicBlock *main_func_entry_bb = BasicBlock::Create(
@@ -208,12 +209,14 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
         main_func
     );
 
-    std::cout<<"DEBUG: function Block made"<<std::endl;
-
     // move the builder to the start of the main function block
     compiler->builder.SetInsertPoint(main_func_entry_bb);
 
     std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
+    for(auto i: arglist->list) {
+        AllocaInst *alloca = compiler->builder.CreateAlloca(gType(i->dtype, compiler), 0, i->identifier);
+        compiler->builder.CreateStore(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), gType(i->dtype, compiler), true), alloca);
+    }
     Value *r = stmtlist->llvm_codegen(compiler);
     // return 0;
     compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
@@ -223,7 +226,24 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
 
 Value *NodeCall::llvm_codegen(LLVMCompiler *compiler) {
     Function *CalleeF = compiler->module.getFunction(identifier);
-    return compiler->builder.CreateCall(CalleeF, {}, "calltmp");
+
+    std::vector<Value*> params;
+    for(auto i: paramlist->list) {
+        params.push_back(i->llvm_codegen(compiler));
+    }
+    return compiler->builder.CreateCall(CalleeF, params, "calltmp");
+}
+
+Value *NodeArgs::llvm_codegen(LLVMCompiler *compiler) {
+    return nullptr;
+}
+
+Value *NodeArg::llvm_codegen(LLVMCompiler *compiler) {
+    return nullptr;
+}
+
+Value *NodeParams::llvm_codegen(LLVMCompiler *compiler) {
+    return nullptr;
 }
 
 #undef MAIN_FUNC

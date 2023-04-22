@@ -31,6 +31,32 @@ struct NodeStmts : public Node {
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
+struct NodeArg : public Node {
+    std::string identifier;
+    std::string dtype;
+
+    NodeArg(std::string id, std::string d);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+struct NodeArgs : public Node {
+    std::vector<NodeArg*> list;
+
+    NodeArgs();
+    void push_back(NodeArg *node);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+struct NodeParams : public Node {
+    std::vector<Node*> list;
+
+    NodeParams();
+    void push_back(Node *node);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
 /**
     Node for binary operations
 */
@@ -95,17 +121,18 @@ struct NodeIdent : public Node {
 struct NodeFunc : public Node {
     std::string identifier;
     std::string dtype;
-    Node *stmtlist;
+    NodeStmts *stmtlist;
+    NodeArgs *arglist;
 
-    NodeFunc(std::string ident, std::string d, Node *stmts);
+    NodeFunc(std::string ident, std::string d, NodeStmts *stmts, NodeArgs *args);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
 struct NodeCall : public Node {
     std::string identifier;
-
-    NodeCall(std::string ident);
+    NodeParams *paramlist;
+    NodeCall(std::string ident, NodeParams* params);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };

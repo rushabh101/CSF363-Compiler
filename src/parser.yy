@@ -28,12 +28,15 @@ int yyerror(std::string msg);
 %token TPLUS TDASH TSTAR TSLASH
 %token <lexeme> TINT_LIT TIDENT DTYPE
 %token TLET TDBG TFUN
-%token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL
+%token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL TCOMMA
 %token TQM TCOLON
 %token TIF TELSE 
 
 %type <node> Expr Stmt
+%type <arg> Arg
 %type <stmts> Program StmtList
+%type <args> ArgList
+%type <params> ParaList
 
 
 
@@ -54,23 +57,23 @@ StmtList : Stmt
          { $$->push_back($2); }
 	     ;
 
-Stmt : TFUN TIDENT TLPAREN TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
+Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
         if(func_table.contains($2)) {
             // tried to redeclare function, so error
             yyerror("tried to redeclare function.\n");
         } else {
             func_table.insert($2);
-            $$ = new NodeFunc($2, $6 ,$8);
+            $$ = new NodeFunc($2, $7 ,$9, $4);
         }
      }
-     | TIDENT TLPAREN TRPAREN TSCOL
+     | TIDENT TLPAREN ParaList TRPAREN TSCOL
      {
         if(!func_table.contains($1)) {
             yyerror("Function not declared.\n");
         }
 
-        $$ = new NodeCall($1);
+        $$ = new NodeCall($1, $3);
      }
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
@@ -114,8 +117,53 @@ Expr : TINT_LIT
      | TLPAREN Expr TRPAREN { $$ = $2; }
      ;
 
-%%
 
+ArgList :
+        {
+            $$ = new NodeArgs();
+        }
+        | Arg
+        {
+            $$ = new NodeArgs();
+            $$->push_back($1);
+        }
+        |
+          ArgList TCOMMA Arg
+        {
+            $$->push_back($3);
+        }
+        ;
+        
+Arg     : TIDENT TCOLON DTYPE
+        {
+            if(symbol_table.contains($1)) {
+                // tried to redeclare variable, so error
+                yyerror("tried to redeclare variable.\n");
+            } else {
+                symbol_table.insert($1);
+                $$ = new NodeArg($1, $3);
+
+            }
+        }
+        ;
+
+ParaList :
+        {
+            $$ = new NodeParams();
+        }
+        | Expr
+        {
+            $$ = new NodeParams();
+            $$->push_back($1);
+        }
+        |
+          ParaList TCOMMA Expr
+        {
+            $$->push_back($3);
+        }
+        ;
+
+%%
 int yyerror(std::string msg) {
     std::cerr << "Error: Invalid Syntax " << msg << std::endl;
     exit(1);
