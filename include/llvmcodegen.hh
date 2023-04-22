@@ -3,6 +3,7 @@
 
 #include <llvm/IR/Instructions.h>
 #include <string>
+#include <stack>
 #include <llvm/IR/LLVMContext.h>
 #include <llvm/IR/IRBuilder.h>
 #include <llvm/IR/Module.h>
@@ -22,6 +23,8 @@ struct LLVMCompiler {
     Module module;
     std::unordered_map<std::string, AllocaInst*> locals;
     std::unordered_map<std::string, int> type_scope;
+
+    std::stack<std::string> current_function;
     
     LLVMCompiler(LLVMContext *context, std::string file_name) : 
         context(context), builder(*context), module(file_name, *context) {
@@ -31,6 +34,7 @@ struct LLVMCompiler {
         type_scope["short"] = 16;
         type_scope["int"] = 32;
         type_scope["long"] = 64;
+        module.getFunction("printi");
     }
     
     void compile(Node *root);

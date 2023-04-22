@@ -39,38 +39,32 @@ void LLVMCompiler::compile(Node *root) {
         module.getFunction("printi");
     */
 
-    /* Main Function */
-    // int main();
-    // FunctionType *main_func_type = FunctionType::get(
-    //     builder.getInt32Ty(), {}, false /* is vararg */
-    // );
-    // Function *main_func = Function::Create(
-    //     main_func_type,
-    //     GlobalValue::ExternalLinkage,
-    //     "main",
-    //     &module
-    // );
-
-    // // create main function block
-    // BasicBlock *main_func_entry_bb = BasicBlock::Create(
-    //     *context,
-    //     "entry",
-    //     main_func
-    // );
-
-    // // move the builder to the start of the main function block
-    // builder.SetInsertPoint(main_func_entry_bb);
-
     root->llvm_codegen(this);
 
     // // return 0;
     // builder.CreateRet(builder.getInt32(0));
 }
 
+Value* TypeConversion(Value *expr, Type* ty, LLVMCompiler *compiler) {
+    std::string type_str;
+    llvm::raw_string_ostream rso(type_str);
+    expr->getType()->print(rso);
+
+    std::string type_str2;
+    llvm::raw_string_ostream rso2(type_str2);
+    ty->print(rso2);
+
+    // std::cout<<rso.str()<<rso2.str()<<std::endl;
+    if(compiler->type_scope[rso2.str()] < compiler->type_scope[rso.str()]) {
+        std::cerr << "Error: Value bigger datatype than variable" << std::endl;
+        exit(1);
+    }
+
+    return compiler->builder.CreateIntCast(expr, ty, true);
+}
 AllocaInst *CreateEntryBlockAlloca(Function *TheFunction,
                                           StringRef VarName, Type *ty) {
-  IRBuilder<> TmpB(&TheFunction->getEntryBlock(),
-                   TheFunction->getEntryBlock().begin());
+  IRBuilder<> TmpB(&TheFunction->getEntryBlock(), TheFunction->getEntryBlock().begin());
   return TmpB.CreateAlloca(ty, nullptr, VarName);
 }
 
@@ -163,16 +157,16 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
 
     compiler->locals[identifier] = alloc;
 
-    std::string type_str;
-    llvm::raw_string_ostream rso(type_str);
-    expr->getType()->print(rso);
+    // std::string type_str;
+    // llvm::raw_string_ostream rso(type_str);
+    // expr->getType()->print(rso);
 
-    if(compiler->type_scope[dtype] < compiler->type_scope[rso.str()]) {
-        std::cerr << "Error: Value bigger datatype than assignment" << std::endl;
-        exit(1);
-    }
+    // if(compiler->type_scope[dtype] < compiler->type_scope[rso.str()]) {
+    //     std::cerr << "Error: Value bigger datatype than assignment" << std::endl;
+    //     exit(1);
+    // }
 
-    Value *temp = compiler->builder.CreateIntCast(expr, ty, true);
+    Value *temp = TypeConversion(expr, ty, compiler);
 
     return compiler->builder.CreateStore(temp, alloc);
 }
@@ -222,13 +216,18 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
         AllocaInst *alloca = CreateEntryBlockAlloca(main_func, i.getName(), gType(arglist->list[cnt++]->dtype, compiler));
         compiler->builder.CreateStore(&i, alloca);
         compiler->locals[std::string(i.getName())] = alloca;
-        // compiler->builder.CreateStore(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), gType(i->dtype, compiler), true), alloca);
     }
 
     std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
+
+    compiler->current_function.push(identifier);
     Value *r = stmtlist->llvm_codegen(compiler);
+    compiler->current_function.pop();
     // return 0;
-    compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
+    if(main_func_entry_bb->getTerminator() == 0) {
+        compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
+    }
+    // compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
 
     return r;
 }
@@ -241,6 +240,13 @@ Value *NodeCall::llvm_codegen(LLVMCompiler *compiler) {
         params.push_back(i->llvm_codegen(compiler));
     }
     return compiler->builder.CreateCall(CalleeF, params, "calltmp");
+}
+
+Value *NodeReturn::llvm_codegen(LLVMCompiler *compiler) {
+    Value *expr = expression->llvm_codegen(compiler);
+    Function *f = compiler->module.getFunction(compiler->current_function.top());
+    Type *ty = f->getReturnType();
+    return compiler->builder.CreateRet(TypeConversion(expr, ty, compiler));
 }
 
 Value *NodeArgs::llvm_codegen(LLVMCompiler *compiler) {

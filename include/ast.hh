@@ -137,6 +137,13 @@ struct NodeCall : public Node {
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
+struct NodeReturn : public Node {
+    Node *expression;
+    NodeReturn(Node *expr);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
 
 struct NodeIfExpr : public Node {
     std::unique_ptr<Node> Cond, Else;

@@ -146,3 +146,11 @@ NodeCall::NodeCall(std::string ident, NodeParams* params) {
 std::string NodeCall::to_string() {
     return "(call " + identifier + " (" + paramlist->to_string() +"))"; 
 }
+
+NodeReturn::NodeReturn(Node *expr) {
+    expression = expr;
+}
+
+std::string NodeReturn::to_string() {
+    return "(ret " + expression->to_string() + ")";
+}

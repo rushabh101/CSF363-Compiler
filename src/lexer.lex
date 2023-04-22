@@ -26,6 +26,7 @@ extern int yyerror(std::string msg);
 "dbg"     { return TDBG; }
 "let"     { return TLET; }
 "fun"     { return TFUN; }
+"ret"     { return TRET; }
 "int"|"short"|"long"     { yylval.lexeme = std::string(yytext); return DTYPE; }
 [0-9]+    { yylval.lexeme = std::string(yytext); return TINT_LIT; }
 [a-zA-Z]+ { yylval.lexeme = std::string(yytext); return TIDENT; }

@@ -27,7 +27,7 @@ int yyerror(std::string msg);
 
 %token TPLUS TDASH TSTAR TSLASH
 %token <lexeme> TINT_LIT TIDENT DTYPE
-%token TLET TDBG TFUN
+%token TLET TDBG TFUN TRET
 %token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL TCOMMA
 %token TQM TCOLON
 %token TIF TELSE 
@@ -88,6 +88,10 @@ Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      | TDBG Expr TSCOL
      { 
         $$ = new NodeDebug($2);
+     }
+     | TRET Expr TSCOL
+     {
+        $$ = new NodeReturn($2);
      }
      |TIF Expr TLCURL StmtList TRCURL TELSE TLCURL StmtList TRCURL
      {
