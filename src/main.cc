@@ -86,8 +86,22 @@ int main(int argc, char *argv[]) {
 
 	if(final_values) {
 		if (arg_option == ARG_OPTION_P) {
+			std::cout << std::endl;
 			std::cout << final_values->to_string() << std::endl;
+			
 			// add a write to file here
+			std::ofstream outfile("opt.txt");
+    
+			if (!outfile) {
+				std::cerr << "Error opening file!" << std::endl;
+				return 1;
+			}
+			
+			outfile << final_values->to_string() << std::endl;
+			
+			outfile.close();
+			
+			std::cout << "\nOptimized AST written to opt.txt" << std::endl;
 			return 0;
 		}
 		

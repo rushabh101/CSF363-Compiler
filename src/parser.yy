@@ -115,13 +115,11 @@ Expr : TINT_LIT
      | Expr TPLUS Expr
      { 
         if (typeid(*$1) == typeid(NodeInt)){
-            std::cout << "Integer Found" << std::endl;
             NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
             NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
             $$ = new NodeInt(temp_1->value + temp_3->value);
         }
         else{
-            std::cout << "?? Found" << std::endl;
             $$ = new NodeBinOp(NodeBinOp::PLUS, $1, $3); 
         }
 
@@ -129,39 +127,33 @@ Expr : TINT_LIT
      | Expr TDASH Expr
      { 
         if (typeid(*$1) == typeid(NodeInt)){
-            std::cout << "Integer Found" << std::endl;
             NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
             NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
             $$ = new NodeInt(temp_1->value - temp_3->value);
         }
         else{
-            std::cout << "?? Found" << std::endl;
             $$ = new NodeBinOp(NodeBinOp::MINUS, $1, $3); 
         }
      }
      | Expr TSTAR Expr
      { 
         if (typeid(*$1) == typeid(NodeInt)){
-            std::cout << "Integer Found" << std::endl;
             NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
             NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
             $$ = new NodeInt(temp_1->value * temp_3->value);
         }
         else{
-            std::cout << "?? Found" << std::endl;
             $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); 
         }
      }
      | Expr TSLASH Expr
      { 
         if (typeid(*$1) == typeid(NodeInt)){
-            std::cout << "Integer Found" << std::endl;
             NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
             NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
             $$ = new NodeInt(temp_1->value / temp_3->value);
         }
         else{
-            std::cout << "?? Found" << std::endl;
             $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); 
         } 
      }

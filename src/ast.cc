@@ -108,7 +108,7 @@ NodeDecl::NodeDecl(std::string id, Node *expr, std::string d) {
 }
 
 std::string NodeDecl::to_string() {
-    return "(let " + dtype + " " + identifier + " " + expression->to_string() + ")";
+    return "(let (" + identifier + " " + dtype + ") " + expression->to_string() + ")";
 }
 
 NodeDebug::NodeDebug(Node *expr) {
