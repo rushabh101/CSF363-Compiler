@@ -113,13 +113,58 @@ Expr : TINT_LIT
             yyerror("using undeclared variable.\n");
      }
      | Expr TPLUS Expr
-     { $$ = new NodeBinOp(NodeBinOp::PLUS, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            std::cout << "Integer Found" << std::endl;
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value + temp_3->value);
+        }
+        else{
+            std::cout << "?? Found" << std::endl;
+            $$ = new NodeBinOp(NodeBinOp::PLUS, $1, $3); 
+        }
+
+     }
      | Expr TDASH Expr
-     { $$ = new NodeBinOp(NodeBinOp::MINUS, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            std::cout << "Integer Found" << std::endl;
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value - temp_3->value);
+        }
+        else{
+            std::cout << "?? Found" << std::endl;
+            $$ = new NodeBinOp(NodeBinOp::MINUS, $1, $3); 
+        }
+     }
      | Expr TSTAR Expr
-     { $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            std::cout << "Integer Found" << std::endl;
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value * temp_3->value);
+        }
+        else{
+            std::cout << "?? Found" << std::endl;
+            $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); 
+        }
+     }
      | Expr TSLASH Expr
-     { $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            std::cout << "Integer Found" << std::endl;
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value / temp_3->value);
+        }
+        else{
+            std::cout << "?? Found" << std::endl;
+            $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); 
+        } 
+     }
      | TLPAREN Expr TRPAREN { $$ = $2; }
      | TIDENT TLPAREN ParaList TRPAREN
      {

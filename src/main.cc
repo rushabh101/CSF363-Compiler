@@ -87,6 +87,7 @@ int main(int argc, char *argv[]) {
 	if(final_values) {
 		if (arg_option == ARG_OPTION_P) {
 			std::cout << final_values->to_string() << std::endl;
+			// add a write to file here
 			return 0;
 		}
 		
