@@ -290,7 +290,7 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
     }
 
     // CondV = compiler->builder.CreateFCmpONE(ConstantFP::get(*(compiler->context), APFloat(0.0)), ConstantFP::get(*(compiler->context), APFloat(0.0)), "ifcond");
-    CondV = compiler->builder.CreateICmpNE(CondV, compiler->builder.getInt32(0), "ifcond");
+    CondV = compiler->builder.CreateICmpNE(TypeConversion(CondV, compiler->builder.getInt64Ty(), compiler), compiler->builder.getInt64(0), "ifcond");
 
     Function *TheFunction = compiler->builder.GetInsertBlock()->getParent();
 

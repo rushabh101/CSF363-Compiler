@@ -74,7 +74,7 @@ Stmt : TFUN {symbol_table.scope();} TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE 
      
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
      {
-        if(symbol_table.contains($2)) {
+        if(symbol_table.containsScope($2)) {
             // tried to redeclare variable, so error
             yyerror("tried to redeclare variable.\n");
         } else {
@@ -197,7 +197,7 @@ ArgList :
         
 Arg     : TIDENT TCOLON DTYPE
         {
-            if(symbol_table.contains($1)) {
+            if(symbol_table.containsScope($1)) {
                 // tried to redeclare variable, so error
                 yyerror("tried to redeclare variable.\n");
             } else {

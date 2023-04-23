@@ -12,6 +12,7 @@ struct SymbolTable {
     std::list<std::set<std::string>> table;
 
     bool contains(std::string key);
+    bool containsScope(std::string key);
     void insert(std::string key);
     void scope();
     void unscope();

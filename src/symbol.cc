@@ -11,6 +11,10 @@ bool SymbolTable::contains(std::string key) {
     return found;
 }
 
+bool SymbolTable::containsScope(std::string key) {
+    return table.back().find(key) != table.back().end();
+}
+
 void SymbolTable::insert(std::string key) {
     table.back().insert(key);
 }

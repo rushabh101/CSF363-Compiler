@@ -1,7 +1,12 @@
 fun main() : int {
-    let abc : int = 20000;
+    let a : int = 1;
 
-    dbg abc + 1;
+    if a {
+        dbg 1;
+    }
+    else {
+        dbg 2;
+    }
 }
 
 
