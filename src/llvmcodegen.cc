@@ -20,6 +20,32 @@
 The documentation for LLVM codegen, and how exactly this file works can be found
 ins `docs/llvm.md`
 */
+AllocaInst* SymbolsTable::find(std::string key) {
+    AllocaInst* found = nullptr;
+    for(auto i : table) {
+        if(i.find(key) != i.end()) {
+            found = i[key];
+            break;
+        }
+    }
+    return found;
+}
+
+bool SymbolsTable::containsScope(std::string key, AllocaInst* alloca) {
+    return table.back().find(key) != table.back().end();
+}
+
+void SymbolsTable::insert(std::string key, AllocaInst* alloca) {
+    table.front()[key] = alloca;
+}
+
+void SymbolsTable::scope() {
+    table.push_front(std::unordered_map<std::string, AllocaInst*>());
+}
+
+void SymbolsTable::unscope() {
+    table.pop_front();
+}
 
 void LLVMCompiler::compile(Node *root) {
     /* Adding reference to print_i in the runtime library */
@@ -38,7 +64,7 @@ void LLVMCompiler::compile(Node *root) {
     /* we can get this later 
         module.getFunction("printi");
     */
-
+    symbols.scope();
     root->llvm_codegen(this);
 
     // // return 0;
@@ -170,7 +196,8 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
     Function *TheFunction = compiler->builder.GetInsertBlock()->getParent();
     AllocaInst *alloc = CreateEntryBlockAlloca(TheFunction, identifier, ty);
 
-    compiler->locals[identifier] = alloc;
+    // compiler->locals[identifier] = alloc;
+    compiler->symbols.insert(identifier, alloc);
 
     // std::string type_str;
     // llvm::raw_string_ostream rso(type_str);
@@ -187,7 +214,8 @@ Value *NodeDecl::llvm_codegen(LLVMCompiler *compiler) {
 }
 
 Value *NodeIdent::llvm_codegen(LLVMCompiler *compiler) {
-    AllocaInst *alloc = compiler->locals[identifier];
+    // AllocaInst *alloc = compiler->locals[identifier];
+    AllocaInst *alloc = compiler->symbols.find(identifier);
 
     // if your LLVM_MAJOR_VERSION >= 14
     return compiler->builder.CreateLoad(alloc->getAllocatedType(), alloc, identifier);
@@ -230,7 +258,8 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     for(auto &i: main_func->args()) {
         AllocaInst *alloca = CreateEntryBlockAlloca(main_func, i.getName(), gType(arglist->list[cnt++]->dtype, compiler));
         compiler->builder.CreateStore(&i, alloca);
-        compiler->locals[std::string(i.getName())] = alloca;
+        // compiler->locals[std::string(i.getName())] = alloca;
+        compiler->symbols.insert(std::string(i.getName()), alloca);
     }
 
     std::cout<<"DEBUG: starting codegen for "<<identifier<<std::endl;
@@ -302,10 +331,11 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
     }
     compiler->builder.CreateCondBr(CondV, ThenBB, ElseBB);
 
-
+    compiler->symbols.scope();
     compiler->builder.SetInsertPoint(ThenBB);
 
     Value *ThenV = Then->llvm_codegen(compiler);
+    compiler->symbols.unscope();
 
     if (!ThenV)
        {return nullptr;}
@@ -314,15 +344,18 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
         compiler->builder.CreateBr(MergeBB);
     }
 
-
     ThenBB = compiler->builder.GetInsertBlock();
 
     TheFunction->getBasicBlockList().push_back(ElseBB);
+
+    compiler->symbols.scope();
     compiler->builder.SetInsertPoint(ElseBB);
 
     Value *ElseV = Else->llvm_codegen(compiler);
     if (!ElseV)
         return nullptr;
+    compiler->symbols.unscope();
+
 
 
     if(compiler->builder.GetInsertBlock()->getTerminator() == 0) {

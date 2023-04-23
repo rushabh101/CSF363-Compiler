@@ -1,12 +1,14 @@
 fun main() : int {
-    let a : int = 1;
-
+    let a : int = 0;
+    let b : short = 2;
     if a {
-        dbg 1;
+        let b : short = 69;
+        dbg b;
     }
     else {
-        dbg 2;
+        dbg b;
     }
+    dbg b;
 }
 
 
