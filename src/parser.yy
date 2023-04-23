@@ -51,7 +51,9 @@ Program :
         { final_values = $1; }
 	    ;
 
-StmtList : Stmt                
+StmtList :
+         { $$ = new NodeStmts(); } 
+         | Stmt                
          { $$ = new NodeStmts(); $$->push_back($1); }
 	     | StmtList Stmt 
          { $$->push_back($2); }

@@ -224,7 +224,7 @@ Value *NodeFunc::llvm_codegen(LLVMCompiler *compiler) {
     Value *r = stmtlist->llvm_codegen(compiler);
     compiler->current_function.pop();
     // return 0;
-    if(main_func_entry_bb->getTerminator() == 0) {
+    if(compiler->builder.GetInsertBlock()->getTerminator() == 0) {
         compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
     }
     // compiler->builder.CreateRet(compiler->builder.CreateIntCast(compiler->builder.getInt32(0), ty, true));
@@ -274,7 +274,8 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
         return nullptr;
     }
 
-    // CondV = compiler->builder.CreateFCmpONE(CondV, compiler->builder.getInt32(0), "ifcond");
+    // CondV = compiler->builder.CreateFCmpONE(ConstantFP::get(*(compiler->context), APFloat(0.0)), ConstantFP::get(*(compiler->context), APFloat(0.0)), "ifcond");
+    CondV = compiler->builder.CreateICmpNE(CondV, compiler->builder.getInt32(0), "ifcond");
 
     Function *TheFunction = compiler->builder.GetInsertBlock()->getParent();
 
@@ -297,23 +298,27 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
 
     ThenBB = compiler->builder.GetInsertBlock();
 
+    TheFunction->getBasicBlockList().push_back(ElseBB);
     compiler->builder.SetInsertPoint(ElseBB);
 
     Value *ElseV = Else->llvm_codegen(compiler);
     if (!ElseV)
-    return nullptr;
+        return nullptr;
 
 
     compiler->builder.CreateBr(MergeBB);
 
     ElseBB = compiler->builder.GetInsertBlock();
+
+    TheFunction->getBasicBlockList().push_back(MergeBB);
+
     compiler->builder.SetInsertPoint(MergeBB);
-    PHINode *PN = compiler->builder.CreatePHI(Type::getInt32Ty(*(compiler->context)), 2, "iftmp");
+    // PHINode *PN = compiler->builder.CreatePHI(Type::getInt32Ty(*(compiler->context)), 2, "iftmp");
 
 
-    PN->addIncoming(ThenV, ThenBB);
-    PN->addIncoming(ElseV, ElseBB);
-    return PN;
+    // PN->addIncoming(ThenV, ThenBB);
+    // PN->addIncoming(ElseV, ElseBB);
+    return ThenV;
 
 
 
