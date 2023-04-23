@@ -92,8 +92,18 @@ Stmt : TFUN {symbol_table.scope();} TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE 
      }
      | TIF {symbol_table.scope();} Expr TLCURL StmtList TRCURL TELSE {symbol_table.unscope(); symbol_table.scope();} TLCURL StmtList TRCURL
      {
+        if (typeid(*$3) == typeid(NodeInt)){
+            std::cout << "Integer Found in IF" << std::endl;
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            if(temp_3->value != 0)
+                $$ = $5;
+            else
+                $$ = $10;
+        }
+        else{
+            $$ = new NodeIfExpr($3, $5, $10);
+        }
 
-        $$ = new NodeIfExpr($3, $5, $10);
         symbol_table.unscope();
         
      }
