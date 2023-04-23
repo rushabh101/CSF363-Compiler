@@ -133,15 +133,30 @@ Value *NodeBinOp::llvm_codegen(LLVMCompiler *compiler) {
     Value *left_expr = left->llvm_codegen(compiler);
     Value *right_expr = right->llvm_codegen(compiler);
 
+    std::string type_str1;
+    llvm::raw_string_ostream rso1(type_str1);
+    left_expr->getType()->print(rso1);
+
+    std::string type_str2;
+    llvm::raw_string_ostream rso2(type_str2);
+    right_expr->getType()->print(rso2);
+
+    Type *max;
+    if(compiler->type_scope[rso1.str()] > compiler->type_scope[rso2.str()]) {
+        max = left_expr->getType();
+    }
+    else {
+        max = right_expr->getType();
+    }
     switch(op) {
         case PLUS:
-        return compiler->builder.CreateAdd(left_expr, right_expr, "addtmp");
+        return compiler->builder.CreateAdd(TypeConversion(left_expr, max, compiler), TypeConversion(right_expr, max, compiler), "addtmp");
         case MINUS:
-        return compiler->builder.CreateSub(left_expr, right_expr, "minustmp");
+        return compiler->builder.CreateSub(TypeConversion(left_expr, max, compiler), TypeConversion(right_expr, max, compiler), "minustmp");
         case MULT:
-        return compiler->builder.CreateMul(left_expr, right_expr, "multtmp");
+        return compiler->builder.CreateMul(TypeConversion(left_expr, max, compiler), TypeConversion(right_expr, max, compiler), "multmp");
         case DIV:
-        return compiler->builder.CreateSDiv(left_expr, right_expr, "divtmp");
+        return compiler->builder.CreateSDiv(TypeConversion(left_expr, max, compiler), TypeConversion(right_expr, max, compiler), "divtmp");
     }
 }
 
