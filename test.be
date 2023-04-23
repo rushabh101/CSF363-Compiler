@@ -1,6 +1,6 @@
-fun moo(b : short, a : int) : int {
-    let aa : int = b;
-    dbg 69;
+fun moo(b : short) : int {
+    let abc : int = b;
+    dbg abc;
 
     if 1 {
         ret 1;
@@ -13,13 +13,15 @@ fun moo(b : short, a : int) : int {
 fun main() : int {
     let abc : int = 20000;
 
-    dbg moo(1, 1);
+    dbg moo(69);
 
 
     if 0 {
-        dbg 1;
+        let a : short = 1;
+        dbg a;
     } else {
-        dbg 2;
+        let a : short = 2;
+        dbg a;
     }
 }
 

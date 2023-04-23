@@ -47,8 +47,8 @@ int yyerror(std::string msg);
 
 Program :                
         { final_values = nullptr; }
-        | StmtList 
-        { final_values = $1; }
+        | {func_table.scope();} StmtList 
+        { final_values = $2; }
 	    ;
 
 StmtList :
@@ -59,15 +59,17 @@ StmtList :
          { $$->push_back($2); }
 	     ;
 
-Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
+Stmt : TFUN {symbol_table.scope();} TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
-        if(func_table.contains($2)) {
+        if(func_table.contains($3)) {
             // tried to redeclare function, so error
             yyerror("tried to redeclare function.\n");
         } else {
-            func_table.insert($2);
-            $$ = new NodeFunc($2, $7 ,$9, $4);
+            func_table.insert($3);
+            $$ = new NodeFunc($3, $8 ,$10, $5);
         }
+
+        symbol_table.unscope();
      }
      
      | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
@@ -88,10 +90,11 @@ Stmt : TFUN TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
         $$ = new NodeReturn($2);
      }
-     |TIF Expr TLCURL StmtList TRCURL TELSE TLCURL StmtList TRCURL
+     | TIF {symbol_table.scope();} Expr TLCURL StmtList TRCURL TELSE {symbol_table.unscope(); symbol_table.scope();} TLCURL StmtList TRCURL
      {
 
-        $$ = new NodeIfExpr($2, $4, $8);
+        $$ = new NodeIfExpr($3, $5, $10);
+        symbol_table.unscope();
         
      }
      | Expr TSCOL
