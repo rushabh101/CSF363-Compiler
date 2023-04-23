@@ -283,8 +283,10 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
     BasicBlock *ElseBB = BasicBlock::Create(*(compiler->context), "else");
     BasicBlock *MergeBB = BasicBlock::Create(*(compiler->context), "ifcont");
 
-
+    if(compiler->builder.GetInsertBlock()->getTerminator() == 0) {
+    }
     compiler->builder.CreateCondBr(CondV, ThenBB, ElseBB);
+
 
     compiler->builder.SetInsertPoint(ThenBB);
 
@@ -293,7 +295,9 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
     if (!ThenV)
        {return nullptr;}
 
-    compiler->builder.CreateBr(MergeBB);
+    if(compiler->builder.GetInsertBlock()->getTerminator() == 0) {
+        compiler->builder.CreateBr(MergeBB);
+    }
 
 
     ThenBB = compiler->builder.GetInsertBlock();
@@ -306,7 +310,9 @@ Value *NodeIfExpr::llvm_codegen(LLVMCompiler *compiler)
         return nullptr;
 
 
-    compiler->builder.CreateBr(MergeBB);
+    if(compiler->builder.GetInsertBlock()->getTerminator() == 0) {
+        compiler->builder.CreateBr(MergeBB);
+    }
 
     ElseBB = compiler->builder.GetInsertBlock();
 

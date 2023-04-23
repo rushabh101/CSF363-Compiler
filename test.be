@@ -1,6 +1,13 @@
 fun moo(b : short, a : int) : int {
     let aa : int = b;
     dbg 69;
+
+    if 1 {
+        ret 1;
+    }
+    else {
+        ret 2;
+    }
 }
 
 fun main() : int {
