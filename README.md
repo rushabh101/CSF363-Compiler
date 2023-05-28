@@ -1,4 +1,5 @@
 # Changes Made to the Baseline
+- Added comment and macro support
 - Added support for different integer types: short, int, long
 - Added if statements, evaluates to true of the expression is a 0
 - Added functions, function definitions, return types and calls are supported. The code will start execution with the main function.

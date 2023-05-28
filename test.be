@@ -1,8 +1,11 @@
+#def A 55
+
 fun main() : int {
+    // Nerdin
     let a : int = 0;
     let b : short = 2;
-    if a {
-        let b : short = 69;
+    if 1 {
+        let b : short = A;
         dbg b;
     }
     else {
@@ -10,10 +13,3 @@ fun main() : int {
     }
     dbg b;
 }
-
-
-
-
-#undef abc
-let abc = 2;
-MAC
