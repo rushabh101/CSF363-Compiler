@@ -1,21 +1,18 @@
-#def abc bd
-#def MAC let r =10; \
-dbg r;
+fun main() : int {
+    let a : int = 0;
+    let b : short = 2;
+    if a {
+        let b : short = 69;
+        dbg b;
+    }
+    else {
+        dbg b;
+    }
+    dbg b;
+}
 
-#def AA
 
-#ifdef abc
-let abc = 123 - AA * 10;
-dbg abc + abc;
-#else
-dbg 10;
-#endif
 
-let z = 3;
-z = 0 ? 3+1*2 : 4;
-
-/* sakdflj */
-// one line is all I need
 
 #undef abc
 let abc = 2;

@@ -57,3 +57,7 @@ bin/test.bc: test.be
 obj/runtime_lib.o: runtime/runtime_lib.cc
 	@echo "Building runtime library..."
 	@echo "clang++ -c runtime/runtime_lib.cc -o obj/runtime_lib.o"; clang++ -c runtime/runtime_lib.cc -o obj/runtime_lib.o
+
+obj/runtime_lib.o: runtime/runtime_lib.cc
+	@echo "Building runtime library..."
+	@echo "clang++ -c runtime/runtime_lib.cc -o obj/runtime_lib.o"; clang++ -c runtime/runtime_lib.cc -o obj/runtime_lib.o

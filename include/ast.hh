@@ -2,7 +2,6 @@
 #define AST_HH
 
 #include <llvm/IR/Value.h>
-
 #include <string>
 #include <vector>
 
@@ -13,14 +12,7 @@ Base node class. Defined as `abstract`.
 */
 struct Node {
     enum NodeType {
-        BIN_OP,
-        INT_LIT,
-        STMTS,
-        ASSN,
-        DBG,
-        IDENT,
-        TERN_OP,
-        AASSN
+        BIN_OP, INT_LIT, STMTS, ASSN, DBG, IDENT
     } type;
 
     virtual std::string to_string() = 0;
@@ -31,9 +23,35 @@ struct Node {
     Node for list of statements
 */
 struct NodeStmts : public Node {
-    std::vector<Node *> list;
+    std::vector<Node*> list;
 
     NodeStmts();
+    void push_back(Node *node);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+struct NodeArg : public Node {
+    std::string identifier;
+    std::string dtype;
+
+    NodeArg(std::string id, std::string d);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+struct NodeArgs : public Node {
+    std::vector<NodeArg*> list;
+
+    NodeArgs();
+    void push_back(NodeArg *node);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+struct NodeParams : public Node {
+    std::vector<Node*> list;
+
+    NodeParams();
     void push_back(Node *node);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
@@ -44,10 +62,7 @@ struct NodeStmts : public Node {
 */
 struct NodeBinOp : public Node {
     enum Op {
-        PLUS,
-        MINUS,
-        MULT,
-        DIV
+        PLUS, MINUS, MULT, DIV
     } op;
 
     Node *left, *right;
@@ -57,21 +72,13 @@ struct NodeBinOp : public Node {
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
 
-struct NodeTernOp : public Node {
-    Node *left, *mid, *right;
-
-    NodeTernOp(Node *leftptr, Node *midptr, Node *rightptr);
-    std::string to_string();
-    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
-};
-
 /**
     Node for integer literals
 */
 struct NodeInt : public Node {
-    int value;
+    long long value;
 
-    NodeInt(int val);
+    NodeInt(long long val);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
@@ -79,20 +86,12 @@ struct NodeInt : public Node {
 /**
     Node for variable assignments
 */
-struct NodeAssn : public Node {
+struct NodeDecl : public Node {
     std::string identifier;
     Node *expression;
+    std::string dtype;
 
-    NodeAssn(std::string id, Node *expr);
-    std::string to_string();
-    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
-};
-
-struct NodeAAssn : public Node {
-    std::string identifier;
-    Node *expression;
-
-    NodeAAssn(std::string id, Node *expr);
+    NodeDecl(std::string id, Node *expr, std::string d);
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
@@ -118,5 +117,46 @@ struct NodeIdent : public Node {
     std::string to_string();
     llvm::Value *llvm_codegen(LLVMCompiler *compiler);
 };
+
+struct NodeFunc : public Node {
+    std::string identifier;
+    std::string dtype;
+    NodeStmts *stmtlist;
+    NodeArgs *arglist;
+
+    NodeFunc(std::string ident, std::string d, NodeStmts *stmts, NodeArgs *args);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+struct NodeCall : public Node {
+    std::string identifier;
+    NodeParams *paramlist;
+    NodeCall(std::string ident, NodeParams* params);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+struct NodeReturn : public Node {
+    Node *expression;
+    NodeReturn(Node *expr);
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+};
+
+
+struct NodeIfExpr : public Node {
+    Node* Cond;
+    Node* Then;
+    Node* Else;
+
+    NodeIfExpr(Node* Cond, Node* Then, Node* Else);
+   
+    std::string to_string();
+    llvm::Value *llvm_codegen(LLVMCompiler *compiler);
+
+};
+
+
 
 #endif

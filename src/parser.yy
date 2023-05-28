@@ -19,69 +19,102 @@ extern int yyparse();
 
 extern NodeStmts* final_values;
 
-SymbolTable symbol_table;
+SymbolTable symbol_table, func_table;
 
 int yyerror(std::string msg);
 
 }
 
 %token TPLUS TDASH TSTAR TSLASH
-%token <lexeme> TINT_LIT TIDENT
-%token INT TLET TDBG
-%token TSCOL TLPAREN TRPAREN TEQUAL
+%token <lexeme> TINT_LIT TIDENT DTYPE
+%token TLET TDBG TFUN TRET
+%token TSCOL TLPAREN TRPAREN TLCURL TRCURL TEQUAL TCOMMA
 %token TQM TCOLON
+%token TIF TELSE 
 
 %type <node> Expr Stmt
+%type <arg> Arg
 %type <stmts> Program StmtList
+%type <args> ArgList
+%type <params> ParaList
 
-%left TQM TCOLON
+
+
 %left TPLUS TDASH
 %left TSTAR TSLASH
-
 
 %%
 
 Program :                
         { final_values = nullptr; }
-        | StmtList TSCOL 
-        { final_values = $1; }
+        | {func_table.scope();} StmtList 
+        { final_values = $2; }
 	    ;
 
-StmtList : Stmt                
+StmtList :
+         { $$ = new NodeStmts(); } 
+         | Stmt                
          { $$ = new NodeStmts(); $$->push_back($1); }
-	     | StmtList TSCOL Stmt 
-         { $$->push_back($3); }
+	     | StmtList Stmt 
+         { $$->push_back($2); }
 	     ;
 
-Stmt : TLET TIDENT TEQUAL Expr
+Stmt : TFUN {symbol_table.scope();} TIDENT TLPAREN ArgList TRPAREN TCOLON DTYPE TLCURL StmtList TRCURL
      {
-        if(symbol_table.contains($2)) {
+        if(func_table.contains($3)) {
+            // tried to redeclare function, so error
+            yyerror("tried to redeclare function.\n");
+        } else {
+            func_table.insert($3);
+            $$ = new NodeFunc($3, $8 ,$10, $5);
+        }
+
+        symbol_table.unscope();
+     }
+     
+     | TLET TIDENT TCOLON DTYPE TEQUAL Expr TSCOL
+     {
+        if(symbol_table.containsScope($2)) {
             // tried to redeclare variable, so error
             yyerror("tried to redeclare variable.\n");
         } else {
             symbol_table.insert($2);
-
-            $$ = new NodeAssn($2, $4);
+            $$ = new NodeDecl($2, $6, $4);
         }
      }
-     | TDBG Expr
+     | TDBG Expr TSCOL
      { 
         $$ = new NodeDebug($2);
      }
-     | TIDENT TEQUAL Expr
+     | TRET Expr TSCOL
      {
-        if(symbol_table.contains($1)) {
-            $$ = new NodeAAssn($1, $3);
-        } else {
-            
-            yyerror("attempt to assign value to undeclared variable.\n");
+        $$ = new NodeReturn($2);
+     }
+     | TIF {symbol_table.scope();} Expr TLCURL StmtList TRCURL TELSE {symbol_table.unscope(); symbol_table.scope();} TLCURL StmtList TRCURL
+     {
+        if (typeid(*$3) == typeid(NodeInt)){
+            std::cout << "Integer Found in IF" << std::endl;
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            if(temp_3->value != 0)
+                $$ = $5;
+            else
+                $$ = $10;
         }
+        else{
+            $$ = new NodeIfExpr($3, $5, $10);
+        }
+
+        symbol_table.unscope();
         
+     }
+     | Expr TSCOL
+     {
+        $$ = $1;
      }
      ;
 
 Expr : TINT_LIT               
-     { $$ = new NodeInt(stoi($1)); }
+     { $$ = new NodeInt(stoll($1)); }
      | TIDENT
      { 
         if(symbol_table.contains($1))
@@ -90,22 +123,109 @@ Expr : TINT_LIT
             yyerror("using undeclared variable.\n");
      }
      | Expr TPLUS Expr
-     { $$ = new NodeBinOp(NodeBinOp::PLUS, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value + temp_3->value);
+        }
+        else{
+            $$ = new NodeBinOp(NodeBinOp::PLUS, $1, $3); 
+        }
+
+     }
      | Expr TDASH Expr
-     { $$ = new NodeBinOp(NodeBinOp::MINUS, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value - temp_3->value);
+        }
+        else{
+            $$ = new NodeBinOp(NodeBinOp::MINUS, $1, $3); 
+        }
+     }
      | Expr TSTAR Expr
-     { $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value * temp_3->value);
+        }
+        else{
+            $$ = new NodeBinOp(NodeBinOp::MULT, $1, $3); 
+        }
+     }
      | Expr TSLASH Expr
-     { $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); }
-     | TLPAREN Expr TRPAREN
-     { $$ = $2; }
-     | Expr TQM Expr TCOLON Expr
-     { $$ = new NodeTernOp($1, $3, $5); }
+     { 
+        if (typeid(*$1) == typeid(NodeInt)){
+            NodeInt* temp_1 = dynamic_cast<NodeInt*>($1);
+            NodeInt* temp_3 = dynamic_cast<NodeInt*>($3);
+            $$ = new NodeInt(temp_1->value / temp_3->value);
+        }
+        else{
+            $$ = new NodeBinOp(NodeBinOp::DIV, $1, $3); 
+        } 
+     }
+     | TLPAREN Expr TRPAREN { $$ = $2; }
+     | TIDENT TLPAREN ParaList TRPAREN
+     {
+        if(!func_table.contains($1)) {
+            yyerror("Function not declared.\n");
+        }
+
+        $$ = new NodeCall($1, $3);
+     }
      ;
 
-%%
 
+ArgList :
+        {
+            $$ = new NodeArgs();
+        }
+        | Arg
+        {
+            $$ = new NodeArgs();
+            $$->push_back($1);
+        }
+        |
+          ArgList TCOMMA Arg
+        {
+            $$->push_back($3);
+        }
+        ;
+        
+Arg     : TIDENT TCOLON DTYPE
+        {
+            if(symbol_table.containsScope($1)) {
+                // tried to redeclare variable, so error
+                yyerror("tried to redeclare variable.\n");
+            } else {
+                symbol_table.insert($1);
+                $$ = new NodeArg($1, $3);
+
+            }
+        }
+        ;
+
+ParaList :
+        {
+            $$ = new NodeParams();
+        }
+        | Expr
+        {
+            $$ = new NodeParams();
+            $$->push_back($1);
+        }
+        |
+          ParaList TCOMMA Expr
+        {
+            $$->push_back($3);
+        }
+        ;
+
+%%
 int yyerror(std::string msg) {
-    std::cerr << "Error! " << msg << std::endl;
+    std::cerr << "Error: Invalid Syntax " << msg << std::endl;
     exit(1);
 }
