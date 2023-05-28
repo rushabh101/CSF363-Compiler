@@ -1,3 +1,8 @@
+# Changes Made to the Baseline
+- Added support for different integer types: short, int, long
+- Added if statements, evaluates to true of the expression is a 0
+- Added functions, function definitions, return types and calls are supported. The code will start execution with the main function.
+
 # CSF363 Baseline Language
 
 Welcome to CS F363! This is the baseline language project that will be used for all further labs/assignments  in this course.
